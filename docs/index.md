@@ -7,8 +7,11 @@ tags:
 
 ## Project Assignment 1
 
+Option 1: Download the .ipynb file: 
+[Assignment 1 Report (Jupyter Notebook)](RAS557 Project Assignment 1 — Klann-style Hexapod_Oct 15_v2.ipynb)
 
-
+Option 2: Convert the notebook to HTML
+[Assignment 1 Report (HTML)](RAS557 Project Assignment 1 — Klann-style Hexapod_Oct 15_v2.html)
 
 
 ## Project Assignment 2
