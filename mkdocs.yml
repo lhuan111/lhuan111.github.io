@@ -1,6 +1,6 @@
 site_name: RAS557 Foldable Robotics Project Website
-site_url: https://embedded-systems-design.github.io/template_report
-repo_url: https://github.com/embedded-systems-design/template_report
+site_url: https://lhuan111.github.io
+repo_url: https://lhuan111.github.io
 edit_uri: edit/main/docs/
 theme:
   name: material
@@ -65,5 +65,5 @@ extra:
   generator: false
   social:
     - icon: fontawesome/regular/file-code
-      link: /2023_fall
-      name: 2023 Site    
+      link: /2025_fall
+      name: 2025 Site    
