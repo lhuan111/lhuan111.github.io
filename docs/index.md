@@ -9,7 +9,8 @@ tags:
 
 Option 1: Download the .ipynb file 
 
-[Assignment 1 Report (Jupyter Notebook)](RAS557 Project Assignment 1 — Klann-style Hexapod_Oct 15_v2.ipynb)
+[Download Assignment 1 Notebook (.ipynb)](RAS557%20Project%20Assignment%201%20%E2%80%94%20Klann-style%20Hexapod_Oct%2015_v2.ipynb)
+
 
 Option 2: Download the pdf
 
