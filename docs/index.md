@@ -1,5 +1,5 @@
 ---
-title: Welcome
+title: Welcome to Klann-style six-leg walking robot portfolio website!
 tags:
 - tag1
 - tag2
