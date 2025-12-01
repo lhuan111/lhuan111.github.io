@@ -1,21 +1,17 @@
 ---
-title: Welcome to Klann-style six-leg walking robot portfolio website!
+title: Welcome!
 tags:
-- tag1
-- tag2
+- foldable robotics
+- walking robots
 ---
 
-## Et poposcerat rursus ad magnus premit
+## Project Assignment 1
 
-Lorem markdownum gradus, qui largis, nec pater pleno: fatum. Adspexit cursus
-cur, aut in adhuc crimina **habebat**: pro.
 
-- Et ducimus
-- Prosecta hinc nix vidi rettulit cum sitim
-- Has in tonitribus tenebrae Romane mirantum resupina
-- Figuras et dextram
 
-## Esse quoque sedem plena nunc iecur
+
+
+## Project Assignment 2
 
 Possemque suos dumque. Deum recta rogantem, inquinat facta gigantas; ego nisi
 mea. Nec tamen quae gravem, potens, [cognoscendo
