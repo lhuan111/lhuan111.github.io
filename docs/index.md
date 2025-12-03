@@ -24,6 +24,14 @@ Project Photos:
 </div>
 
 
+<img src="https://drive.google.com/uc?id=1vGvoq0HiLQJof5djTxe39Sr6mLtNEj7N" width="600">
+
+<img src="https://drive.google.com/uc?id=1Uvg0XrinVQvSC5nBsf-ml8TyVx4I9IA4" width="600">
+
+<img src="https://drive.google.com/uc?id=1SwTsaAdJ2SOl47dO6l--ZbhwFAGD8e0E" width="600">
+
+
+
 
 Project video: 
 
