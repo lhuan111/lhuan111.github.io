@@ -10,15 +10,15 @@ tags:
 
 Project video: 
 
-<iframe 
-    width="560" 
-    height="315" 
-    src="https://www.youtube.com/embed/b33vg-D-HBs" 
+<div class="video-container">
+<iframe
+    src="https://www.youtube.com/embed/b33vg-D-HBs"
     title="Six Leg Robot"
-    frameborder="0" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen>
 </iframe>
+</div>
 
 
 
