@@ -57,6 +57,17 @@ tags:
 </iframe>
 </div>
 
+<iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/GbdgqD_z7yU"
+    title="Simulating Robot Kinematics"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+</iframe>
+
+
 ## Measuring Friction:
 
 <div class="video-container">
