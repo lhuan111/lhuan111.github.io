@@ -7,6 +7,21 @@ tags:
 
 ## Project Assignment 1
 
+
+Project video: 
+
+<iframe 
+    width="560" 
+    height="315" 
+    src="https://www.youtube.com/embed/b33vg-D-HBs" 
+    title="Six Leg Robot"
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+    allowfullscreen>
+</iframe>
+
+
+
 Option 1: Download the .ipynb file 
 
 [Download Assignment 1 Notebook (.ipynb)](RAS557%20Project%20Assignment%201%20%E2%80%94%20Klann-style%20Hexapod_Oct%2015_v2.ipynb)
