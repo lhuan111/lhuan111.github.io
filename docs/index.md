@@ -9,24 +9,9 @@ tags:
 
 Project Photos: 
 
-<p align="center">
-  <img src="klann_back.jpg" width="300">
-  <img src="klann_front.jpg" width="300">
-  <img src="klann_side.jpg" width="300">
-</p>
+<img src="https://drive.google.com/uc?id=1vGvoq0HiLQJof5djTxe39Sr6mLtNEj7N" width="300">
 
-
-
-<div style="display:flex; gap:20px;">
-  <img src="klann_back.jpg" width="300">
-  <img src="klann_front.jpg" width="300">
-  <img src="klann_side.jpg" width="300">
-</div>
-
-
-<img src="https://drive.google.com/uc?id=1vGvoq0HiLQJof5djTxe39Sr6mLtNEj7N" width="600">
-
-<img src="https://drive.google.com/uc?id=1Uvg0XrinVQvSC5nBsf-ml8TyVx4I9IA4" width="600">
+<img src="https://drive.google.com/uc?id=1Uvg0XrinVQvSC5nBsf-ml8TyVx4I9IA4" width="300">
 
 <img src="https://drive.google.com/uc?id=1SwTsaAdJ2SOl47dO6l--ZbhwFAGD8e0E" width="600">
 
