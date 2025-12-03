@@ -5,7 +5,7 @@ tags:
 - walking robots
 ---
 
-# Project Assignment 1
+# **Project Assignment 1**
 
 ## Project Photos: 
 
@@ -16,17 +16,18 @@ tags:
 
 ## Project Video: 
 
-<div class="video-container">
 <iframe
+    width="560"
+    height="315"
     src="https://www.youtube.com/embed/b33vg-D-HBs"
-    title="Six Leg Robot"
+    title="Klann-Style Six Leg Robot"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen>
 </iframe>
-</div>
 
-## Project Files
+
+## Project Files: 
 
 - Option 1: Download the .ipynb file 
 
@@ -38,7 +39,7 @@ tags:
 [Download Assignment 1 Report (PDF)](RAS557%20Project%20Assignment%201%20%E2%80%94%20Klann-style%20Hexapod_Oct%2015_v2.ipynb.pdf)
 
 
-# Project Assignment 2
+# **Project Assignment 2**
 
 ## Demonstrating Robot Kinematics:
 
@@ -68,7 +69,7 @@ tags:
 </iframe>
 
 
-## Downloading the .dxf file
+## Downloading the .dxf file: 
 
 [Download the layser cutting .dxf file](https://drive.google.com/file/d/1LF2AlNSIYC5J-23TM4jydFAAj1r5O-O3/view?usp=drive_link)
 
@@ -76,7 +77,7 @@ tags:
 
 [Download the file making instructions](Project%20Laser%20Cut.pdf)
 
-## Laser Cut Robot Photos
+## Laser Cut Robot Photos: 
 
 <img src="Laser_cut_flat.jpg" width="600">
 <img src="Laser_cut_standup.jpg" width="600">
