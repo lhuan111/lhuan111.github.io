@@ -41,7 +41,7 @@ tags:
 
 # Project Assignment 2
 
-## Robot Kinematics:
+## Demonstrating Robot Kinematics:
 
 <div class="video-container">
 <iframe
@@ -66,4 +66,11 @@ tags:
 </div>
 
 ## Downloading the .dxf file
+
+[Download the .dxf file](https://drive.google.com/file/d/1LF2AlNSIYC5J-23TM4jydFAAj1r5O-O3/view?usp=drive_link)
+
+## Downloading the file making process instructions
+
+![Download](Project%20Laser%20Cut.pdf)
+
 
