@@ -9,6 +9,10 @@ tags:
 
 ## Project Photos: 
 
+<img src="klann_front.jpg" width="600">
+<img src="klann_back.jpg" width="600">
+<img src="klann_side.jpg" width="600">
+
 <img src="https://drive.google.com/uc?id=1vGvoq0HiLQJof5djTxe39Sr6mLtNEj7N" width="600">
 
 <img src="https://drive.google.com/uc?id=1Uvg0XrinVQvSC5nBsf-ml8TyVx4I9IA4" width="600">
@@ -45,7 +49,7 @@ tags:
 
 <div class="video-container">
 <iframe
-    src="https://youtu.be/h-qRB8NbPaI"
+    src="https://youtu.be/embed/h-qRB8NbPaI"
     title="Simulating Robot Kinematics"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -57,7 +61,7 @@ tags:
 
 <div class="video-container">
 <iframe
-    src="https://youtu.be/GbdgqD_z7yU"
+    src="https://youtu.be/embed/GbdgqD_z7yU"
     title="Measuring Robot Friction"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -67,10 +71,10 @@ tags:
 
 ## Downloading the .dxf file
 
-[Download the .dxf file](https://drive.google.com/file/d/1LF2AlNSIYC5J-23TM4jydFAAj1r5O-O3/view?usp=drive_link)
+[Download the layser cutting .dxf file](https://drive.google.com/file/d/1LF2AlNSIYC5J-23TM4jydFAAj1r5O-O3/view?usp=drive_link)
 
 ## Downloading the file making process instructions
 
-![Download](Project%20Laser%20Cut.pdf)
+![Download the file making instructions](Project%20Laser%20Cut.pdf)
 
 
