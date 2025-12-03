@@ -74,6 +74,10 @@ tags:
 
 ## Downloading the file making process instructions
 
-![Download the file making instructions](Project%20Laser%20Cut.pdf)
+[Download the file making instructions](Project%20Laser%20Cut.pdf)
 
+## Laser Cut Robot Photos
+
+<img src="Laser_cut_flat.jpg" width="600">
+<img src="Laser_cut_standup.jpg" width="600">
 
