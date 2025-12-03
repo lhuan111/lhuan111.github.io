@@ -9,6 +9,20 @@ tags:
 
 Project Photos: 
 
+<p align="center">
+  <img src="klann_back.jpg" width="300">
+  <img src="klann_front.jpg" width="300">
+  <img src="klann_side.jpg" width="300">
+</p>
+
+
+
+<div style="display:flex; gap:20px;">
+  <img src="klann_back.jpg" width="300">
+  <img src="klann_front.jpg" width="300">
+  <img src="klann_side.jpg" width="300">
+</div>
+
 
 
 Project video: 
