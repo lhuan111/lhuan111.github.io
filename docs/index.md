@@ -211,6 +211,7 @@ $l_{10}f$= 1 inch
 Use the Jacobian to map end-effector forces to actuator torques, then compute power = torque * angular velocity.
 Fill in calculated/assumed GRFs and pick key gait states to compute required actuator specs.
 
+```
 !pip install mujoco
 
 # Set up GPU rendering.
@@ -327,7 +328,11 @@ import matplotlib
 import sympy
 print("✅ All core dependencies are available and working!")
 
+```
+
 Step 2: Computer acutuator torque from foot force per lec and power
+
+```
 # Compute actuator torque from foot force (per leg) and power
 theta = 0.3
 Jt = dfoot_dtheta(theta)
@@ -337,6 +342,7 @@ omega = 6.0  # rad/s example
 power = tau * omega
 print(f"Crank torque required (Nm) at theta={theta:.3f}: {tau:.4f} N·m")
 print(f"Mechanical power at crank (W) for omega={omega} rad/s: {power:.4f} W")
+```
 
 ## 6 — Plots & Figures
 
@@ -345,7 +351,7 @@ Use matplotlib to create plots (GRF plots, kinematic traces, energy/power curves
 As we try to solve section 6, we created two versions.
 
 ### **Below is version 1 for the whole robot:**
-We added the following constrants:
+We added the following constranits:
 
 ```
     mjcf.append('  <equality>')
@@ -354,6 +360,8 @@ We added the following constrants:
     mjcf.append('  </equality>')
 ```
 
+Below is the code: 
+```
 # MJCF generator for Klann hexapod (approximate multi-body representation)
 import textwrap, os, numpy as _np
 params_local = {
@@ -445,8 +453,10 @@ plt.title("Hexapod with Klann-style Leg Approx (single phase shown per leg)")
 plt.xlabel("x (m)")
 plt.ylabel("y (m)")
 plt.show()
+```
 
-# Sweep crank angle & compute required crank torque for a given vertical foot force
+Sweep crank angle & compute required crank torque for a given vertical foot force
+```
 import numpy as np
 thetas = np.linspace(0, 2*np.pi, 101)
 torques = []
@@ -465,12 +475,12 @@ plt.title("Torque vs Crank Angle (per leg)")
 plt.grid(True)
 plt.show()
 print("Torque stats: min {:.4f} Nm, max {:.4f} Nm".format(torques.min(), torques.max()))
-
+```
 
 ### **Below is version 2 based on one leg kinematics:**
 
 The second version is based on Prof. Aukes' suggestion on working one-leg's kinematics. We do not have xml file for it, and we also ran out of time.
-
+```
 import numpy as np, math
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
@@ -695,6 +705,7 @@ if __name__ == "__main__":
         print(f"τ={tau:.2f} N·m, ω={omega:.2f} rad/s, P≈{tau*omega:.2f} W")
 
 <img width="391" height="370" alt="image" src="https://github.com/user-attachments/assets/47de986f-4611-497e-94d3-eeb7b416257e" />
+```
 
 #### Version 2 Explanation:
 
