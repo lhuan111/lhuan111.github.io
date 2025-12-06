@@ -15,8 +15,6 @@ title: **Project Assignment 2**
 </iframe>
 
 
-
-
 ## Measuring Friction:
 
 <iframe
