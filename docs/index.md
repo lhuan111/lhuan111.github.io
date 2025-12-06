@@ -18,9 +18,6 @@ Contents:
 
 ## 1 — Project Goal & Fit
 
-
-### Answer:
-
 **Team goal:**
 
 Our team’s goal is to design, model, and analyze a Klann-style six-legged walking robot that demonstrates efficient ground locomotion using purely mechanical linkages and minimal actuation. The project aims to replicate bio-inspired gait patterns from hexapodal insects while integrating foldable fabrication techniques for lightweight and easily manufacturable components. The design will be simulated in MuJoCo and analyzed for torque, power, and stability requirements.
@@ -51,11 +48,7 @@ The project directly employs foldable robotics techniques introduced in class, u
 
 ## 2 — Background Research
 
-
-### **Answer:**
-
-
-#### Search Terms
+**Search Terms**
 To inform our design, we conducted literature searches using the following keywords:
 
 - `cockroach biomechanics ground reaction forces`
@@ -68,7 +61,7 @@ To inform our design, we conducted literature searches using the following keywo
 These searches yielded studies on both **biological hexapods** (e.g., *Blaberus giganteus*) and **mechanical walkers** like the **Klann linkage**, which replicates insect-style foot trajectories using a planar six-bar mechanism.
 
 
-#### Representative Citations (IEEE Format)
+**Representative Citations (IEEE Format)**
 
 [1] R. J. Full and D. E. Koditschek, “Templates and anchors: Neuromechanical hypotheses of legged locomotion on land,” *Journal of Experimental Biology*, vol. 202, no. 23, pp. 3325–3332, 1999.  
 [2] K. Klann, “Mechanical leg walking device,” *U.S. Patent 5,281,151*, Jan. 25, 1994.  
@@ -78,7 +71,7 @@ These searches yielded studies on both **biological hexapods** (e.g., *Blaberus 
 
 
 
-#### Key Biological and Mechanical Insights
+** Key Biological and Mechanical Insights**
 
 | Parameter | Unit | Value / Observation | Source |
 |------------|:----:|--------------------:|--------|
@@ -102,6 +95,7 @@ Each leg consists of a planar six-bar linkage, driven by a single rotating crank
 <img src="klann_side.jpg" width="600">
 
 ## Project Video: 
+This video shows the robot walking in the real world. 
 
 <iframe
     width="640"
@@ -328,7 +322,7 @@ Use matplotlib to create plots (GRF plots, kinematic traces, energy/power curves
 
 As we try to solve section 6, we created two versions.
 
-### **Below is version 1 for the whole robot:**
+**Below is version 1 for the whole robot:**
 We added the following constranits:
 
 ```
@@ -455,7 +449,7 @@ plt.show()
 print("Torque stats: min {:.4f} Nm, max {:.4f} Nm".format(torques.min(), torques.max()))
 ```
 
-### **Below is version 2 based on one leg kinematics:**
+**Below is version 2 based on one leg kinematics:**
 
 The second version is based on Prof. Aukes' suggestion on working one-leg's kinematics. We do not have xml file for it, and we also ran out of time.
 ```
@@ -812,7 +806,7 @@ tau_motor_rated = (0.35 / (10 * 0.7)) * 2 = (0.35 / 7) * 2 = 0.05 * 2 = 0.10 N·
 
 So choose a motor with continuous torque ≥ 0.10 N·m (plus check stall and peak currents). If motor speed needed: if ω_crank = 6 rad/s, ω_motor = 60 rad/s (~572 RPM). Check motor torque-speed curve to ensure it can supply torque at that speed.
 
-## 7 — Discussion Points
+## **7 — Discussion Points**
 
 1. Degrees of freedom and number of motors.
 2. How end-effector forces were estimated.
@@ -836,7 +830,7 @@ $$
 The crank angular velocity was chosen as 6 rad/s, corresponding to a walking speed of approximately 0.3 m/s based on the stride length (0.1 m) and step frequency (≈ 3 Hz). This kinematic relationship allows prediction of foot motion through the gait cycle and was verified via the MuJoCo simulation, confirming realistic lift and stance trajectories for the desired gait speed.
 
 
-## Project Files: 
+## **Project Files:** 
 
 - Option 1: Download the .ipynb file 
 
