@@ -1,5 +1,5 @@
 ---
-title: **Project Assignment 2**
+**Project Assignment 2**
 ---
 
 ## Demonstrating Robot Kinematics:
