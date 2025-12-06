@@ -814,7 +814,7 @@ The Klann mechanism used in this design is a **planar six-bar linkage** that tra
 End-effector (foot) forces were estimated based on **biomechanical scaling and dynamic load distribution** during a tripod gait. Assuming the robot mass is 0.8 kg, the total gravitational load is approximately 7.85 N. During stance, three legs support the robot, so each stance leg bears roughly one-third of that load. To account for dynamic impacts and acceleration during gait, a safety factor of 1.5× was applied, giving a peak **ground reaction force (GRF)** of ≈ 3.9 N per leg. This vertical force was used in the Jacobian relationship $\tau = J^T F_{\text{foot}}$ to estimate crank torque. The foot force vector was defined in local leg coordinates as \( [0, 3.9]^T \) N (purely vertical) for simplicity.
 
 
-** 7.3. How End-Effector Speeds Were Estimated**
+**7.3. How End-Effector Speeds Were Estimated**
 
 Foot speeds were derived from the **Jacobian matrix** of the leg mechanism. By differentiating the foot position vector with respect to crank angle (\( \mathbf{J}_\theta = \frac{\partial \mathbf{x}_{foot}}{\partial \theta} \)) and multiplying by the crank angular velocity (\( \dot{\theta} \)), the instantaneous foot velocity was computed:
 $$
