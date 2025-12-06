@@ -97,23 +97,23 @@ These searches yielded studies on both **biological hexapods** (e.g., *Blaberus 
 **Figure 1.** *Klann-style six-legged mechanical walker prototype built for this project.*  
 Each leg consists of a planar six-bar linkage, driven by a single rotating crank. The leg replicates the ground contact and swing phases of a cockroach-like tripod gait. The body is lightweight plywood with foldable linkage connections, and spherical red feet enhance stability and traction. Pictures below show the front, back, and side views.
 
-<img src="https://drive.google.com/uc?id=1vGvoq0HiLQJof5djTxe39Sr6mLtNEj7N" width="600">
+<img src="klann_front.jpg" width="600">
+<img src="klann_back.jpg" width="600">
+<img src="klann_side.jpg" width="600">
 
-<img src="https://drive.google.com/uc?id=1Uvg0XrinVQvSC5nBsf-ml8TyVx4I9IA4" width="600">
+## Project Video: 
 
-<img src="https://drive.google.com/uc?id=1SwTsaAdJ2SOl47dO6l--ZbhwFAGD8e0E" width="600">
-
-
-**Video 1.** Klann-style six-legged walker in action
-
-<video width="640" height="480" controls>
-  <source src="https://drive.google.com/uc?export=download&id=1OqnyoPpAkhYP1msp3k5sh_Ztwodi5m8Q" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
+<iframe
+    width="640"
+    height="480"
+    src="https://www.youtube.com/embed/b33vg-D-HBs"
+    title="Klann-Style Six Leg Robot"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+</iframe>
 
 ## 3 — Specifications Table
-
 
 ### **Answer:**
 
@@ -155,10 +155,6 @@ All quantities are expressed in **SI units**, with values derived from literatur
 
 ## 4 — Mechanism Design & Kinematic Model
 
-Draw your mechanism externally (Inkscape/Draw.io) and save a vector image. Include link or upload.
-
-### **Answer:**
-
 #### Mechanism Description
 The **Klann linkage** is a planar six-bar mechanism designed to transform continuous rotary motion into an approximate leg-like walking trajectory.  
 Each leg consists of:
@@ -169,7 +165,6 @@ Each leg consists of:
 - A **follower leg** connecting the floating coupler to the foot point.
 
 The mechanism’s geometry and motion are optimized so that the **foot follows an oval-shaped trajectory**, with a nearly straight line during the stance phase and a smooth lift during the swing phase.
-
 
 #### Mechanism Drawing
 
@@ -187,24 +182,6 @@ $l_{10}f$= 1 inch
 
 
 
-## Project Photos: 
-
-<img src="klann_front.jpg" width="600">
-<img src="klann_back.jpg" width="600">
-<img src="klann_side.jpg" width="600">
-
-
-## Project Video: 
-
-<iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/b33vg-D-HBs"
-    title="Klann-Style Six Leg Robot"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-</iframe>
 
 ### 5 — Force / Torque / Power Estimation
 
