@@ -83,7 +83,7 @@ These searches yielded studies on both **biological hexapods** (e.g., *Blaberus 
 | Power source | — | Compact 6V–12V battery | — |
 
 
-### Figures and Observations
+**Figures and Observations**
 
 **Figure 1.** *Klann-style six-legged mechanical walker prototype built for this project.*  
 
@@ -107,7 +107,7 @@ This video shows the robot walking in the real world.
     allowfullscreen>
 </iframe>
 
-## **3 — Specifications Table**
+**3 — Specifications Table**
 
 The table below lists key physical and kinematic parameters for the **Klann-style six-legged walker**.  
 All quantities are expressed in **SI units**, with values derived from literature on insect locomotion and scaled for the tabletop prototype.
@@ -157,7 +157,7 @@ Each leg consists of:
 
 The mechanism’s geometry and motion are optimized so that the **foot follows an oval-shaped trajectory**, with a nearly straight line during the stance phase and a smooth lift during the swing phase.
 
-#### Mechanism Drawing
+**Mechanism Drawing**
 
 Draw or model your mechanism externally (e.g., **Draw.io**).  
 Include link labels (A–F), reference frames, and joint variables (θ₁, θ₂, …).  
