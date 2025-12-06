@@ -16,7 +16,7 @@ Contents:
 - Numeric Jacobian (d foot position / d crank angle), torque and power computations
 - An MJCF generator for MuJoCo (approximate multi-body representation)
 
-## 1 — Project Goal & Fit
+## **1 — Project Goal & Fit**
 
 **Team goal:**
 
@@ -46,9 +46,10 @@ Our team brings together complementary skills in mechanical design, kinematics, 
 
 The project directly employs foldable robotics techniques introduced in class, using layered cardboard or plastic sheets with integrated hinge lines to create planar four- and six-bar linkages. The Klann mechanism’s planar structure is ideally suited for this fabrication method, allowing rapid iteration of designs without costly machining. By combining foldable joints with bio-inspired geometry, we can explore how planar foldable mechanisms achieve lifelike motion while remaining lightweight, scalable, and manufacturable using classroom tools.
 
-## 2 — Background Research
+## **2 — Background Research**
 
 **Search Terms**
+
 To inform our design, we conducted literature searches using the following keywords:
 
 - `cockroach biomechanics ground reaction forces`
@@ -60,7 +61,6 @@ To inform our design, we conducted literature searches using the following keywo
 
 These searches yielded studies on both **biological hexapods** (e.g., *Blaberus giganteus*) and **mechanical walkers** like the **Klann linkage**, which replicates insect-style foot trajectories using a planar six-bar mechanism.
 
-
 **Representative Citations (IEEE Format)**
 
 [1] R. J. Full and D. E. Koditschek, “Templates and anchors: Neuromechanical hypotheses of legged locomotion on land,” *Journal of Experimental Biology*, vol. 202, no. 23, pp. 3325–3332, 1999.  
@@ -69,9 +69,7 @@ These searches yielded studies on both **biological hexapods** (e.g., *Blaberus 
 [4] S. Kim, C. Laschi, and B. Trimmer, “Soft robotics: A bioinspired evolution in robotics,” *Trends in Biotechnology*, vol. 31, no. 5, pp. 287–294, 2013.  
 [5] Schilling, M., Schneider, A., Cruse, H., & Schmitz, J. (2008, September). Local control mechanisms in six-legged walking. In 2008 IEEE/RSJ International Conference on Intelligent Robots and Systems (pp. 2655-2660). IEEE.
 
-
-
-** Key Biological and Mechanical Insights**
+**Key Biological and Mechanical Insights**
 
 | Parameter | Unit | Value / Observation | Source |
 |------------|:----:|--------------------:|--------|
@@ -88,13 +86,15 @@ These searches yielded studies on both **biological hexapods** (e.g., *Blaberus 
 ### Figures and Observations
 
 **Figure 1.** *Klann-style six-legged mechanical walker prototype built for this project.*  
+
 Each leg consists of a planar six-bar linkage, driven by a single rotating crank. The leg replicates the ground contact and swing phases of a cockroach-like tripod gait. The body is lightweight plywood with foldable linkage connections, and spherical red feet enhance stability and traction. Pictures below show the front, back, and side views.
 
 <img src="klann_front.jpg" width="600">
 <img src="klann_back.jpg" width="600">
 <img src="klann_side.jpg" width="600">
 
-## Project Video: 
+**Project Video:**
+
 This video shows the robot walking in the real world. 
 
 <iframe
@@ -107,9 +107,7 @@ This video shows the robot walking in the real world.
     allowfullscreen>
 </iframe>
 
-## 3 — Specifications Table
-
-### **Answer:**
+## **3 — Specifications Table**
 
 The table below lists key physical and kinematic parameters for the **Klann-style six-legged walker**.  
 All quantities are expressed in **SI units**, with values derived from literature on insect locomotion and scaled for the tabletop prototype.
@@ -141,13 +139,12 @@ All quantities are expressed in **SI units**, with values derived from literatur
 | Actuators | — | — | Micro servos (6 total) | One per crankshaft |
 | Power source | — | — | 2S Li-ion battery | 7.4 V nominal |
 
-
-### Notes
+**Notes**
 - The above values are representative of the prototype shown in Figures 1–2.  
 - Actual values may vary slightly depending on material density and linkage tolerances.  
 - Use the torque and power values in this table for actuator selection and MuJoCo simulation inputs.
 
-## 4 — Mechanism Design & Kinematic Model
+## **4 — Mechanism Design & Kinematic Model**
 
 #### Mechanism Description
 The **Klann linkage** is a planar six-bar mechanism designed to transform continuous rotary motion into an approximate leg-like walking trajectory.  
@@ -172,13 +169,10 @@ $l_2f$=$l_2b$=$l_4f$=$l_4b$=$l_8f$=$l_8b$=$l_9f$=$l_9b$=2.1 inch,
 
 $l_{10}f$= 1 inch
 
-<img src="https://drive.google.com/uc?id=12F3aCq0PZ8hOh6Q8A8LCHXv_I_JCA0OI" width="800">
-
 <img src="klann_mechanism4.png" width="600">
 
 
-
-### 5 — Force / Torque / Power Estimation
+### **5 — Force / Torque / Power Estimation**
 
 Use the Jacobian to map end-effector forces to actuator torques, then compute power = torque * angular velocity.
 Fill in calculated/assumed GRFs and pick key gait states to compute required actuator specs.
@@ -302,7 +296,7 @@ print("✅ All core dependencies are available and working!")
 
 ```
 
-Step 2: Computer acutuator torque from foot force per lec and power
+**Step 2: Computer acutuator torque from foot force per lec and power**
 
 ```
 # Compute actuator torque from foot force (per leg) and power
@@ -316,7 +310,7 @@ print(f"Crank torque required (Nm) at theta={theta:.3f}: {tau:.4f} N·m")
 print(f"Mechanical power at crank (W) for omega={omega} rad/s: {power:.4f} W")
 ```
 
-## 6 — Plots & Figures
+## **6 — Plots & Figures**
 
 Use matplotlib to create plots (GRF plots, kinematic traces, energy/power curves).
 
@@ -585,7 +579,6 @@ def solve_pose(theta: float, guess: np.ndarray=None,
     E = 0.5*(A + C); F = 0.5*(B + C)
     return Pose(A=A, C=C, B=B, E=E, F=F)
 
-
 def jacobian_A(theta: float, pose: Pose) -> np.ndarray:
     """
     From f(u,θ)=0: du/dθ = -J_u^{-1} J_θ -> take first two rows (A_x,A_y).
@@ -679,7 +672,7 @@ if __name__ == "__main__":
 <img width="391" height="370" alt="image" src="https://github.com/user-attachments/assets/47de986f-4611-497e-94d3-eeb7b416257e" />
 ```
 
-#### Version 2 Explanation:
+**Version 2 Explanation:**
 
 **How the figure was generated**
 - Mechanism: closed-loop **four-bar** with two midpoint struts (pure kinematics; no mass, stiffness, or gravity).
@@ -732,7 +725,7 @@ $$
 We compute required motor torque from the foot force via the Jacobian mapping of crank angle to foot position:
 
 
-#### Motor Torque Calculation and Sizing
+**Motor Torque Calculation and Sizing**
 
 The required crank torque is derived from the **virtual work relationship**:
 
@@ -747,8 +740,7 @@ where:
 - `F_foot` = foot force vector in world frame (e.g., vertical support force).
 
 
-
-#### Motor torque accounting for gearbox and efficiency
+**Motor torque accounting for gearbox and efficiency**
 
 If the motor is connected to the crank through a gearbox of ratio `G` (gear ratio > 1 multiplies torque),  
 and the overall drivetrain efficiency is `η` (0 < η ≤ 1), with a safety margin `M` (e.g., 2),  
@@ -765,7 +757,7 @@ where:
 - `η` — drivetrain efficiency (e.g., 0.7).  
 - `M` — safety margin (e.g., 2).
 
-#### Motor Speed & Electrical Power
+**Motor Speed & Electrical Power**
 
 If peak mechanical power required at the crank is `P_mech = τ_crank * ω_crank`,  
 then the required **electrical power** (ignoring motor electrical losses) is roughly:
@@ -778,8 +770,7 @@ After gearbox, the motor angular rate is
 `ω_motor = G * ω_crank`  
 (because the gearbox reduces speed by `G` when geared for torque).
 
-
-#### Worked Numeric Example
+**Worked Numeric Example**
 
 - Suppose `τ_crank,max = 0.35 N·m` (from torque sweep).  
 - Choose `G = 10`, `η = 0.7`, `M = 2`.
@@ -812,17 +803,19 @@ So choose a motor with continuous torque ≥ 0.10 N·m (plus check stall and pea
 2. How end-effector forces were estimated.
 3. How end-effector speeds were estimated.
 
-### 7.1. Degrees of Freedom and Number of Motors
+**7.1. Degrees of Freedom and Number of Motors**
+
 The Klann mechanism used in this design is a **planar six-bar linkage** that transforms a single rotary input into an approximately linear foot trajectory. Each leg therefore has **one degree of freedom (DOF)**—the input crank rotation. Since the robot uses six legs, the total system has six actuated DOFs, each driven by one motor connected to the crankshaft of its respective leg. The overall body motion is coordinated through synchronized crank phasing (e.g., tripod gait: left-front, right-middle, left-rear in one phase). Passive joints within each linkage do not require additional motors, which simplifies control and reduces weight and cost compared to a multi-DOF leg design.
 
 
 
-### 7.2. How End-Effector Forces Were Estimated
+**7.2. How End-Effector Forces Were Estimated**
+
 End-effector (foot) forces were estimated based on **biomechanical scaling and dynamic load distribution** during a tripod gait. Assuming the robot mass is 0.8 kg, the total gravitational load is approximately 7.85 N. During stance, three legs support the robot, so each stance leg bears roughly one-third of that load. To account for dynamic impacts and acceleration during gait, a safety factor of 1.5× was applied, giving a peak **ground reaction force (GRF)** of ≈ 3.9 N per leg. This vertical force was used in the Jacobian relationship $\tau = J^T F_{\text{foot}}$ to estimate crank torque. The foot force vector was defined in local leg coordinates as \( [0, 3.9]^T \) N (purely vertical) for simplicity.
 
 
+** 7.3. How End-Effector Speeds Were Estimated**
 
-### 7.3. How End-Effector Speeds Were Estimated
 Foot speeds were derived from the **Jacobian matrix** of the leg mechanism. By differentiating the foot position vector with respect to crank angle (\( \mathbf{J}_\theta = \frac{\partial \mathbf{x}_{foot}}{\partial \theta} \)) and multiplying by the crank angular velocity (\( \dot{\theta} \)), the instantaneous foot velocity was computed:
 $$
 \mathbf{v}_{foot} = \mathbf{J}_\theta \, \dot{\theta}
