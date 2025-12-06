@@ -180,6 +180,7 @@ $l_{10}f$= 1 inch
 
 <img src="https://drive.google.com/uc?id=12F3aCq0PZ8hOh6Q8A8LCHXv_I_JCA0OI" width="800">
 
+<img src="klann_mechanism4.png" width="600">
 
 
 
