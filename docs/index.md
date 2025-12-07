@@ -145,7 +145,7 @@ All quantities are expressed in **SI units**, with values derived from literatur
 - Actual values may vary slightly depending on material density and linkage tolerances.  
 - Use the torque and power values in this table for actuator selection and MuJoCo simulation inputs.
 
-## **4 — Mechanism Design & Kinematic Model**
+##**4 — Mechanism Design & Kinematic Model**
 
 #### Mechanism Description
 The **Klann linkage** is a planar six-bar mechanism designed to transform continuous rotary motion into an approximate leg-like walking trajectory.  
@@ -173,7 +173,7 @@ $l_{10}f$= 1 inch
 <img src="klann_mechanism4.png" width="600">
 
 
-### **5 — Force / Torque / Power Estimation**
+##**5 — Force / Torque / Power Estimation**
 
 Use the Jacobian to map end-effector forces to actuator torques, then compute power = torque * angular velocity.
 Fill in calculated/assumed GRFs and pick key gait states to compute required actuator specs.
