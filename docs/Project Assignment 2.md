@@ -38,8 +38,8 @@ title: **Project Assignment 2**
 
 ## Laser Cut Robot Photos: 
 
-<img src="Laser_cut_flat.jpg" width="600">
-<img src="Laser_cut_standup.jpg" width="600">
+<img src="laser_cut_flat.jpg" width="600">
+<img src="laser_cut_standup.jpg" width="600">
 
 <img src="klann_front.jpg" width="600">
 <img src="klann_back.jpg" width="600">
