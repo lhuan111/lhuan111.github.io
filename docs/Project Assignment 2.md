@@ -40,3 +40,7 @@ title: **Project Assignment 2**
 
 <img src="Laser_cut_flat.jpg" width="600">
 <img src="Laser_cut_standup.jpg" width="600">
+
+<img src="klann_front.jpg" width="600">
+<img src="klann_back.jpg" width="600">
+<img src="klann_side.jpg" width="600">
