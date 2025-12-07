@@ -11,6 +11,7 @@ tags:
 **Team members: Shuai Guo, Lixiao Huang, Yibo Yuan**
 
 Contents:
+
 - Klann linkage kinematics for a single leg (numeric closed-loop solver)
 - A hexapod arrangement (6 legs) with phase offsets
 - Numeric Jacobian (d foot position / d crank angle), torque and power computations
