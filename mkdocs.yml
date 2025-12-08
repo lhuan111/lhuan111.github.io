@@ -55,9 +55,19 @@ extra_css:
 extra_javascript:
  - javascripts/mathjax.js
  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Assignment 1: index.md
+  - Assignment 2: Project_Assignment_2.md
     
 not_in_nav: |
   static
+  Charts
+  PIC Table
+  Component Selection Example
+  Subfolder
+  ESP32 Table: esp-32-table.md
+
   
 copyright: "Copyright &copy; 2024 team-name-here"
 
