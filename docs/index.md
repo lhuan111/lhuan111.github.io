@@ -11,6 +11,18 @@
 - Numeric Jacobian (d foot position / d crank angle), torque and power computations
 - An MJCF generator for MuJoCo (approximate multi-body representation)
 
+<iframe
+    width="640"
+    height="480"
+    src="https://www.youtube.com/embed/b33vg-D-HBs"
+    title="Klann-Style Six Leg Robot"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+</iframe>
+
+
+
 
 ## **Part 1 — Project Goal & Fit**
 
@@ -722,6 +734,10 @@ if __name__ == "__main__":
 
 <img width="391" height="370" alt="image" src="https://github.com/user-attachments/assets/47de986f-4611-497e-94d3-eeb7b416257e" />
 ```
+
+<img src="Kinematic model of one leg.png" alt="Kinematic model of one leg" width="600">
+
+
 
 **Version 2 Explanation:**
 
