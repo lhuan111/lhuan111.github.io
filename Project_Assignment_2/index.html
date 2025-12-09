@@ -481,17 +481,11 @@
 <div class="highlight"><pre><span></span><code>from __future__ import annotations
 import math
 from typing import List
-
 import numpy as np
 import mujoco
 import mediapy as media
-import matplotlib.pyplot as plt
-
-#this package is for animation of data
+import matplotlib.pyplot as plt #this package is for animation of data
 import matplotlib.animation as animation
-
-import shutil
-
 import shutil, os # this is to solve the mediapy.show_video failure
 </code></pre></div>
 <p>The functions of the blocks are described on the first row: </p>
@@ -2830,7 +2824,7 @@ def marker_displacement(video_path, px_to_m=1.0):
 - runs MuJoCo simulation for the corresponding model parameter (if you have <code>make_xml_with_param</code> and <code>run_sim_from_xml</code> implemented),
 - collects metrics and saves them.</p>
 <p><strong>WARNING</strong>: Running many MuJoCo simulations can be slow. Run a small sweep first.</p>
-<div class="highlight"><pre><span></span><code># Parameter sweep wrapper
+<div class="highlight"><pre><span></span><code>#Parameter sweep wrapper
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -2903,7 +2897,7 @@ def sweep_hinge_gap(hinge_values_mm, xml_template_str, output_dir="sweep_outputs
 <p><iframe width="560" height="315" src="https://www.youtube.com/embed/h-qRB8NbPaI" title="Simulating Robot Kinematics" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
 </p>
-<h4 id="we-tried-to-use-the-servo-but-the-servo-goes-back-and-forth-not-continouly-rolling-360-degress-so-we-decided-to-continue-using-the-motor">We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degress, so we decided to continue using the motor.</h4>
+<h4 id="we-tried-to-use-the-servo-but-the-servo-goes-back-and-forth-not-continouly-rolling-360-degrees-so-we-decided-to-continue-using-the-motor">We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degrees, so we decided to continue using the motor.</h4>
 <video width="500" controls>
   <source src="servo.mp4" type="video/mp4">
 </video>
@@ -2990,7 +2984,7 @@ def compute_metrics_from_run(df: pd.DataFrame, Kt: float, dt_override=None):
     efficiency = distance / mech_energy if mech_energy &gt; 1e-12 else 0.0
     return {'distance': distance, 'mech_energy': mech_energy, 'elec_energy': elec_energy, 'efficiency': efficiency}
 </code></pre></div>
-<div class="highlight"><pre><span></span><code># ------------------ Aggregate experimental results ------------------
+<div class="highlight"><pre><span></span><code>#Aggregate experimental results ------------------
 def aggregate_experiment(data_dir: str, torque_values: List[float], Kt: float):
     agg = {'param': [], 'distance_mean': [], 'distance_std': [],
            'mech_energy_mean': [], 'mech_energy_std': [],
