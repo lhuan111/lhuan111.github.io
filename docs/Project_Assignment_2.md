@@ -1545,6 +1545,7 @@ if __name__ == "__main__":
 
 ```
 ## Part 2: Optimize your design
+## Part 1: Define the System Model
 
 Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
 
