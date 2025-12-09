@@ -1088,7 +1088,6 @@ DYN_FOURLEG_XML = f"""
 def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
     model = mujoco.MjModel.from_xml_string(DYN_FOURLEG_XML)
     data = mujoco.MjData(model)
-
     # motor joint is joint_L
     jid  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "joint_L")
     qadr = model.jnt_qposadr[jid]
