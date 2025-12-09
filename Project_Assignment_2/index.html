@@ -1085,6 +1085,7 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 &lt;/mujoco&gt;
 """
     return xml
+···
 </code></pre></div>
 <h1 id="-mujoco-xml-4-legs-6-feet-1-motor-">---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------</h1>
 <p>DYN_FOURLEG_XML = f"""
@@ -1665,9 +1666,9 @@ logs = {
 
 return frames, model, data, logs, frame_times
 </code></pre>
-<div class="highlight"><pre><span></span><code>
+<p></p><div class="highlight"><pre><span></span><code>
 </code></pre></div>
-<p>def plot_results(logs):
+def plot_results(logs):
     t        = logs["t"]
     q        = logs["q"]
     dq       = logs["dq"]
@@ -1675,7 +1676,7 @@ return frames, model, data, logs, frame_times
     tau      = logs["tau"]
     base_xyz = logs["base_xyz"]
     base_rpy = logs["base_rpy"]
-    joint_names = logs["joint_names"]</p>
+    joint_names = logs["joint_names"]<p></p>
 <pre><code>xyz_corr = base_xyz * LENGTH_CORR
 
 fig, axs = plt.subplots(3, 2, figsize=(10, 8))
@@ -1946,7 +1947,7 @@ if SAVE_ANIMATION:
 # else:
 #     plot_results(logs)
 </code></pre>
-<div class="highlight"><pre><span></span><code># Part 2: Optimize your design
+<div class="highlight"><pre><span></span><code>## Part 2: Optimize your design
 
 Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
 
@@ -2167,6 +2168,7 @@ return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": 
 
 return results
 </code></pre>
+<p><code></code></p>
 <h1 id="-_8">--------------------------------------------------------------------</h1>
 <h1 id="simple-plotting-helper-visualize-results">Simple plotting helper (visualize results)</h1>
 <h1 id="-_9">--------------------------------------------------------------------</h1>
@@ -2305,23 +2307,7 @@ except Exception as e:
     traceback.print_exc()
     print("Exception during main run:", str(e))
 </code></pre>
-<h1 id="if-name-main">if <strong>name</strong> == "<strong>main</strong>":</h1>
-<h1 id="try">try:</h1>
-<h1 id="1-coarse-sweep"># 1) coarse sweep</h1>
-<h1 id="coarse-nplinspace002-010-9">coarse = np.linspace(0.02, 0.10, 9)</h1>
-<h1 id="results1-parameter_sweepmax_torque_sim-coarse-durationduration">results1 = parameter_sweep("MAX_TORQUE_SIM", coarse, duration=DURATION)</h1>
-<h1 id="plot_sweep_resultsresults1-max_torque_sim">plot_sweep_results(results1, "MAX_TORQUE_SIM")</h1>
-<h1 id="find-best-coarse-torque"># find best coarse torque</h1>
-<h1 id="best_idx-npargmaxresults1efficiency">best_idx = np.argmax(results1["efficiency"])</h1>
-<h1 id="best_torque-results1parambest_idx">best_torque = results1["param"][best_idx]</h1>
-<h1 id="printbest-coarse-torque-best_torque">print("Best coarse torque =", best_torque)</h1>
-<h1 id="2-fine-sweep-around-best-region"># 2) fine sweep around best region</h1>
-<h1 id="low-max002-best_torque-001">low = max(0.02, best_torque - 0.01)</h1>
-<h1 id="high-min010-best_torque-001">high = min(0.10, best_torque + 0.01)</h1>
-<h1 id="fine-nplinspacelow-high-20">fine = np.linspace(low, high, 20)</h1>
-<h1 id="results2-parameter_sweepmax_torque_sim-fine-durationduration">results2 = parameter_sweep("MAX_TORQUE_SIM", fine, duration=DURATION)</h1>
-<h1 id="plot_sweep_resultsresults2-max_torque_sim">plot_sweep_results(results2, "MAX_TORQUE_SIM")</h1>
-<div class="highlight"><pre><span></span><code>7. Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.
+<p><code>7. Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.
 
 **Simulation vs. Real-Life Performance Comparison**
 
@@ -2421,15 +2407,13 @@ d. **Repeatability**
 
 e. **Parameter sweep**
    - Select torque values matching simulation sweep (coarse then fine).
-   - For each torque value, run the N replicates and store logs in uniquely named folders/files:
-     ```
-     &lt;experiment&gt;/&lt;date&gt;/
+   - For each torque value, run the N replicates and store logs in uniquely named folders/files:</code>
+     <experiment>/<date>/
        torque_0.020/run_01/
          log.csv
          video.mp4
        torque_0.020/run_02/ ...
-     ```
-   - Capture video (external camera) for later qualitative analysis.
+     <code>- Capture video (external camera) for later qualitative analysis.
 
 f. **Data processing &amp; metrics computation**
 - Synchronize logs (use timestamp or sync pulse). Resample to a common rate (e.g., 200 Hz).
@@ -2474,8 +2458,7 @@ i. **Ways to make the experiment more streamlined and controlled**
 - **Version control**
   - Record firmware/controller version, parameter settings, and code git commit hash in experiment metadata.
 
-j. **Example minimal automation pseudocode**
-```python
+j. **Example minimal automation pseudocode**</code>python
 for torque in torque_values:
     for run_idx in range(1, N+1):
         set_motor_torque_limit(torque)
@@ -2484,10 +2467,10 @@ for torque in torque_values:
         start_logging("exp/t_{:.3f}/run_{:02d}".format(torque, run_idx))
         run_controller_for_duration(duration_s)
         stop_logging()
-        rename_and_store_video()
-# After sweep:
-run_analysis_pipeline("exp/")
-</code></pre></div>
+        rename_and_store_video()</date></experiment></p>
+<h1 id="after-sweep">After sweep:</h1>
+<p>run_analysis_pipeline("exp/")
+```</p>
 <h1 id="part-3-plan-and-execute-the-manufacturing">Part 3: Plan and Execute the Manufacturing</h1>
 <ol>
 <li>Define the mechanism that will be fabricated using the examples from the book. This may be done with a tool like LibreCAD or similar, and the results should be a .dxf file, with colors indicating hinges, cuts and any other important geometry as color coded lines on different dxf layers.</li>
@@ -2910,7 +2893,7 @@ def sweep_hinge_gap(hinge_values_mm, xml_template_str, output_dir="sweep_outputs
   <source src="prototype3.mp4" type="video/mp4">
 </video>
 
-<p>Finally the robot is walking, we used one AAA battery at first and then it was not enough to move the robot, then we used 3 AAA batteries and it moved. When we put all three AAA batteries directly on the robot, the robot cannot carry the heavy weight to move. Maybe we need stiffer materials to carry a heavy payload. </p>
+<p>Finally, the robot is walking, we used one AAA battery at first and then it was not enough to move the robot, then we used 3 AAA batteries and it moved. When we put all three AAA batteries directly on the robot, the robot cannot carry the heavy weight to move. Maybe we need stiffer materials to carry a heavy payload. </p>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="prototype5.png" data-desc-position="bottom"><img src="prototype5.png" alt="Prototype 5" width="400"></a></p>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="prototype5b.png" data-desc-position="bottom"><img src="prototype5b.png" alt="Prototype 5b" width="400"></a></p>
 <video width="400" controls>
@@ -2966,8 +2949,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List
-
-# ------------------ Helper functions ------------------
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># ------------------ Helper functions ------------------
 def load_runs_for_torque(data_dir: str, torque_val: float) -&gt; List[pd.DataFrame]:
     pattern = os.path.join(data_dir, f"exp_torque_{torque_val:.3f}_run_*.csv")
     files = sorted(glob.glob(pattern))
@@ -3002,8 +2985,8 @@ def compute_metrics_from_run(df: pd.DataFrame, Kt: float, dt_override=None):
         elec_energy = np.nan
     efficiency = distance / mech_energy if mech_energy &gt; 1e-12 else 0.0
     return {'distance': distance, 'mech_energy': mech_energy, 'elec_energy': elec_energy, 'efficiency': efficiency}
-
-# ------------------ Aggregate experimental results ------------------
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># ------------------ Aggregate experimental results ------------------
 def aggregate_experiment(data_dir: str, torque_values: List[float], Kt: float):
     agg = {'param': [], 'distance_mean': [], 'distance_std': [],
            'mech_energy_mean': [], 'mech_energy_std': [],
