@@ -1942,9 +1942,11 @@ if SAVE_ANIMATION:
 # else:
 #     plot_results(logs)
 </code></pre>
-<div class="highlight"><pre><span></span><code>## Part 2: Optimize your design
+<p>```
 
-Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
+</p>
+<h2 id="part-2-optimize-your-design">Part 2: Optimize your design</h2>
+<p>Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
 
 1. This may require you to develop an XML template and regenerate your model programmatically as needed
 
@@ -1952,7 +1954,7 @@ We pick motor torque limit (MAX_TORQUE_SIM) as the example design parameter (it'
 
 2. Select a metric that describes the performance of your robot. This may be robot speed, overal distance travlled in a certain direction, efficiency, etc.
 
-**Metric definitions**
+<strong>Metric definitions</strong>
 
 We compute two metrics per simulation run:
 
@@ -1960,12 +1962,13 @@ We compute two metrics per simulation run:
 - Energy used (J) — numerical integral over simulation of actuator power: sum(|tau * joint_vel| * dt) where tau is data.qfrc_actuator for the motor and joint_vel is the motor joint velocity. We use absolute work approximated by |torque * angular_velocity| * dt. Optionally divide distance by energy for efficiency (m/J).
 
 
-Our XML already contains many &lt;site&gt; elements (e.g., DE1_L_end_site, E1_L_site, F1_L_site, D1_L_site, and possibly the chassis motor_block geom). To measure chassis base world position, we'll use the free body joint chassis_free qpos (first three elements of data.qpos at the base qpos address), which you already logged in base_xyz_log. That avoids any extra &lt;sensor&gt; syntax and is reliable.
+Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, F1_L_site, D1_L_site, and possibly the chassis motor_block geom). To measure chassis base world position, we'll use the free body joint chassis_free qpos (first three elements of data.qpos at the base qpos address), which you already logged in base_xyz_log. That avoids any extra <sensor> syntax and is reliable.
 
 4. Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.
 
 Below is the code for the sweep and the results.
-</code></pre></div>
+
+```</sensor></site></p>
 <h1 id="add-these-imports-at-top-if-not-already-present">Add these imports at top if not already present</h1>
 <p>import math
 import numpy as np
@@ -2483,7 +2486,7 @@ process as in chapter 52 of the book. Save the cut files</p>
 <p>Laser cut the geometry on each layer.</p>
 </li>
 </ol>
-<p>** Laser cutting instructions (markdown)**</p>
+<p><strong>Laser cutting instructions (markdown)</strong></p>
 <p><strong>Before cutting:</strong>
 - Confirm material thickness and kerf (our script uses <code>kerf=0.05</code> — adjust to actual laser kerf, e.g., 0.2 mm).
 - In CAM/lister (e.g., LightBurn, RDWorks, Lasercut software), map DXF layers to speed/power:
