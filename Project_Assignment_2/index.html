@@ -1567,7 +1567,6 @@ tau_log: List[float]      = []
 base_xyz_log: List[np.ndarray] = []
 base_rpy_log: List[np.ndarray] = []
 
-
 # ramp time for motor (seconds)
 ramp_T = 0.45
 sample_skip = 1   # log every N steps to keep arrays small
@@ -1616,7 +1615,6 @@ for k in range(steps):
         base_xyz_log.append(base_xyz)
         base_rpy_log.append(base_rpy)
 
-
 #     # -------------- video frame capture ----------------
 #     if k % max(1, int(1.0 / (dt * FRAMERATE))) == 0:
 #         renderer.update_scene(data, camera="cam")
@@ -1630,7 +1628,6 @@ for k in range(steps):
 #     except Exception as e:
 #         print("mediapy.show_video failed (ffmpeg/codec issue):", e)
 #         print("Continuing without mediapy preview — animation and saving will still run.")
-
 
         # -------------- video frame capture ----------------
     if k % max(1, int(1.0 / (dt * FRAMERATE))) == 0:
@@ -1653,8 +1650,6 @@ if SHOW_VIDEO and frames:
         print("mediapy.show_video failed (ffmpeg/codec issue):", e)
         print("Continuing without mediapy preview — animation and saving will still run.")
 
-
-
  # pack logs into dict for plotting
 logs = {
     "t": np.asarray(t_log),
@@ -1670,8 +1665,7 @@ logs = {
 
 return frames, model, data, logs, frame_times
 </code></pre>
-<p></p><div class="highlight"><pre><span></span><code>
-</code></pre></div>
+<p><code></code>
 def plot_results(logs):
     t        = logs["t"]
     q        = logs["q"]
@@ -1680,7 +1674,7 @@ def plot_results(logs):
     tau      = logs["tau"]
     base_xyz = logs["base_xyz"]
     base_rpy = logs["base_rpy"]
-    joint_names = logs["joint_names"]<p></p>
+    joint_names = logs["joint_names"]</p>
 <pre><code>xyz_corr = base_xyz * LENGTH_CORR
 
 fig, axs = plt.subplots(3, 2, figsize=(10, 8))
