@@ -469,49 +469,57 @@
 <h2 id="part-1-define-the-system-model">Part 1: Define the System Model</h2>
 <p>Produce a final dynamic model in Mujoco that adapts the ideal kinematics of your initial robot model to your ȴnal geometry, material properties (joint stiffness and beam stiffness), and actuator characteristics. Ensure your model includes some aspect of material compliance / flexibility and motor behavior somewhere in your system, and that you have made it possible to vary at least one design parameter of interest and re-run the simulation in a function, for the purposes of wrapping this function in an optimization process. Plot expected performance of the model over a broad range of possible values, in a way that will be correlated to a real-life experiment.</p>
 <p>The following codes carry out the simulation and plots. </p>
-<p>'''
-from <strong>future</strong> import annotations
+<div class="highlight"><pre><span></span><code>from __future__ import annotations
 import math
-from typing import List</p>
-<p>import numpy as np
+from typing import List
+
+import numpy as np
 import mujoco
 import mediapy as media
-import matplotlib.pyplot as plt</p>
-<h1 id="this-package-is-for-animation-of-data">this package is for animation of data</h1>
-<p>import matplotlib.animation as animation</p>
-<p>import shutil</p>
-<p>import shutil, os # this is to solve the mediapy.show_video failure</p>
-<p>'''</p>
+import matplotlib.pyplot as plt
+
+#this package is for animation of data
+import matplotlib.animation as animation
+
+import shutil
+
+import shutil, os # this is to solve the mediapy.show_video failure
+</code></pre></div>
 <p>The functions of the blocks are described on the first row: </p>
-<p>'''</p>
-<h1 id="-global-viz-params-">---------------- Global viz params ----------------</h1>
-<p>WIDTH, HEIGHT = 1024, 576
+<div class="highlight"><pre><span></span><code># ---------------- Global viz params ----------------
+WIDTH, HEIGHT = 1024, 576
 FRAMERATE = 30
 DURATION = 6
 SHOW_VIDEO = True
-SAVE_ANIMATION = True  # set True to save mp4 (requires ffmpeg)</p>
-<h1 id="-geometry-inches-meters-">---------------- Geometry (inches -&gt; meters) ----------------</h1>
-<p>INCH_TO_M = 0.0254</p>
-<p>LENGTH_CORR = 0.01 / INCH_TO_M  </p>
-<p>FOOT_RADIUS = 0.006   # slimmer feet
-Z_OFFSET    = FOOT_RADIUS</p>
-<h1 id="2d-plan-view-geometry-in-inches-at-theta-0">========= 2D plan view geometry in INCHES at theta = 0 =========</h1>
-<h1 id="shared-m-and-b">Shared M and B</h1>
-<p>M_2D = np.array([0.0, 0.0])
-B_2D = np.array([1.0, 0.0])</p>
-<h1 id="back-leg-on-each-side-d_left">Back leg on each side (D_left)</h1>
-<p>D1_2D = np.array([-2.1, 0.0])
+SAVE_ANIMATION = True  # set True to save mp4 (requires ffmpeg)
+
+# ---------------- Geometry (inches -&gt; meters) ----------------
+INCH_TO_M = 0.0254
+
+LENGTH_CORR = 0.01 / INCH_TO_M  
+
+FOOT_RADIUS = 0.006   # slimmer feet
+Z_OFFSET    = FOOT_RADIUS
+
+# ========= 2D plan view geometry in INCHES at theta = 0 =========
+# Shared M and B
+M_2D = np.array([0.0, 0.0])
+B_2D = np.array([1.0, 0.0])
+
+# Back leg on each side (D_left)
+D1_2D = np.array([-2.1, 0.0])
 A1_2D = np.array([-5.2, 0.0])
 C1_2D = np.array([-2.1, 2.833725])
 E1_2D = np.array([-3.65, 1.416863])
-F1_2D = np.array([-0.55, 1.416863])</p>
-<h1 id="front-leg-on-each-side-d_right">Front leg on each side (D_right)</h1>
-<p>D2_2D = np.array([2.1, 0.0])
+F1_2D = np.array([-0.55, 1.416863])
+
+# Front leg on each side (D_right)
+D2_2D = np.array([2.1, 0.0])
 A2_2D = np.array([3.2, 0.0])
 C2_2D = np.array([2.1, 4.053394])
 E2_2D = np.array([2.65, 2.026697])
 F2_2D = np.array([1.55, 2.026697])
-'''</p>
+</code></pre></div>
 <p>def inch2m_xz(p_inch: np.ndarray) -&gt; np.ndarray:
     """Convert [x,z]_inch in drawing plane -&gt; [x,z]_meter with ground offset."""
     x_m = p_inch[0] * INCH_TO_M
@@ -592,11 +600,10 @@ OMEGA_DES = RPM_3V / 60.0 * 2.0 * math.pi   # rad/s target speed</p>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_front.jpg" data-desc-position="bottom"><img src="klann_front.jpg" width="600"></a>
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_back.jpg" data-desc-position="bottom"><img src="klann_back.jpg" width="600"></a>
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p>
-<p>'''</p>
-<h1 id="-">----------------------------------------------------------------------</h1>
-<h1 id="helper-quaternion-roll-pitch-yaw">Helper: quaternion -&gt; roll, pitch, yaw</h1>
-<h1 id="-_1">----------------------------------------------------------------------</h1>
-<p>def quat_to_rpy(q: np.ndarray) -&gt; np.ndarray:
+<div class="highlight"><pre><span></span><code># ----------------------------------------------------------------------
+#  Helper: quaternion -&gt; roll, pitch, yaw
+# ----------------------------------------------------------------------
+def quat_to_rpy(q: np.ndarray) -&gt; np.ndarray:
     """Convert [w, x, y, z] quaternion -&gt; [roll, pitch, yaw] (rad), ZYX."""
     w, x, y, z = q
     # roll (x)
@@ -613,13 +620,13 @@ OMEGA_DES = RPM_3V / 60.0 * 2.0 * math.pi   # rad/s target speed</p>
     siny_cosp = 2.0 * (w * z + x * y)
     cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
     yaw = math.atan2(siny_cosp, cosy_cosp)
-    return np.array([roll, pitch, yaw])</p>
-<p>'''</p>
-<p>'''</p>
-<h1 id="_1">======================================================================</h1>
-<h1 id="inserted-xml-generator-for-parameter-sweeps">INSERTED: XML generator for parameter sweeps</h1>
-<h1 id="_2">======================================================================</h1>
-<p>def generate_fourleg_xml(crank_scale: float = 1.0,
+    return np.array([roll, pitch, yaw])
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># ======================================================================
+# INSERTED: XML generator for parameter sweeps
+# ======================================================================
+
+def generate_fourleg_xml(crank_scale: float = 1.0,
                          max_torque: float | None = None,
                          foot_radius: float | None = None) -&gt; str:
     """
@@ -629,451 +636,460 @@ OMEGA_DES = RPM_3V / 60.0 * 2.0 * math.pi   # rad/s target speed</p>
     """
     MB_scaled = np.array([MB_vec[0], MB_vec[1]]) * float(crank_scale)
     mt = float(MAX_TORQUE_SIM if max_torque is None else max_torque)
-    fr = float(FOOT_RADIUS if foot_radius is None else foot_radius)</p>
-<pre><code># --- Paste the ENTIRE content of your original DYN_FOURLEG_XML here ---
-</code></pre>
-<h1 id="-mujoco-xml-4-legs-6-feet-1-motor-">---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------</h1>
-<pre><code># Replace only:
-#  - the MB_L_bar fromto with {-MB_scaled[0]:.5f} 0 {-MB_scaled[1]:.5f}
-#  - the MB_R_bar fromto with {MB_scaled[0]:.5f} 0 {MB_scaled[1]:.5f}
-#  - each foot geom size with {fr:.4f}
-#  - the actuator ctrlrange upper bound with {mt:.5f}
-xml = f"""
-</code></pre>
-<p><mujoco model="fourbar_fourlegs">
-<br>
-<option timestep="0.0002" gravity="0 0 -9.81">
-    <flag contact="enable">
-  </flag></option>
-</mujoco></p>
-<p><visual>
-    <global offwidth="{WIDTH}" offheight="{HEIGHT}">
-  </global></visual></p>
-<p><worldbody></worldbody></p>
-<pre><code>&lt;!-- ground --&gt;
-&lt;geom name="floor" type="plane" pos="0 0 0"
-      size="2 2 0.02"
-      friction="0.5 0.005 0.0005"
-      contype="1" conaffinity="0"
-      rgba="0.4 0.4 0.4 1"/&gt;
+    fr = float(FOOT_RADIUS if foot_radius is None else foot_radius)
 
-&lt;!-- light and camera --&gt;
-&lt;light name="top" pos="0 0 1" dir="0 0 -1"
-       diffuse="1 1 1" specular="0.2 0.2 0.2"/&gt;
+    # --- Paste the ENTIRE content of your original DYN_FOURLEG_XML here ---
+# ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------
 
-&lt;camera name="cam" mode="fixed"
-        pos="0 -0.5 0.10"
-        axisangle="1 0 0 90"/&gt;
+    # Replace only:
+    #  - the MB_L_bar fromto with {-MB_scaled[0]:.5f} 0 {-MB_scaled[1]:.5f}
+    #  - the MB_R_bar fromto with {MB_scaled[0]:.5f} 0 {MB_scaled[1]:.5f}
+    #  - each foot geom size with {fr:.4f}
+    #  - the actuator ctrlrange upper bound with {mt:.5f}
+    xml = f"""
+&lt;mujoco model="fourbar_fourlegs"&gt;
+  &lt;option timestep="0.0002" gravity="0 0 -9.81"&gt;
+    &lt;flag contact="enable"/&gt;
+  &lt;/option&gt;
 
-&lt;!-- CHASSIS at M, centered between left/right legs (y=0) --&gt;
-&lt;body name="chassis" pos="{M[0]:.5f} 0 {M[1]:.5f}"&gt;
-  &lt;joint name="chassis_free" type="free"/&gt;
+  &lt;visual&gt;
+    &lt;global offwidth="{WIDTH}" offheight="{HEIGHT}"/&gt;
+  &lt;/visual&gt;
 
-  &lt;!-- base + motor block (smaller) --&gt;
-  &lt;geom name="chassis_base" type="box" size="0.007 0.007 0.0045"
-        mass="{MASS_BASE:.4f}" rgba="0.6 0.6 0.6 1"/&gt;
-  &lt;geom name="motor_block" type="box" size="0.009 0.006 0.015"
-        mass="{MASS_MOTOR:.4f}" pos="0 0 0.03"
-        rgba="1 1 0.3 1"/&gt;
+  &lt;worldbody&gt;
 
-  &lt;!-- ========== D anchors (fixed on chassis) ========== --&gt;
+    &lt;!-- ground --&gt;
+    &lt;geom name="floor" type="plane" pos="0 0 0"
+          size="2 2 0.02"
+          friction="0.5 0.005 0.0005"
+          contype="1" conaffinity="0"
+          rgba="0.4 0.4 0.4 1"/&gt;
 
-  &lt;!-- Left-back D1_L --&gt;
-  &lt;body name="D1_L_body" pos="{D1_rel[0]:.5f} {-Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
-    &lt;geom name="D1_L_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.3 0.8 0.1 1"/&gt;
-    &lt;site name="D1_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+    &lt;!-- light and camera --&gt;
+    &lt;light name="top" pos="0 0 1" dir="0 0 -1"
+           diffuse="1 1 1" specular="0.2 0.2 0.2"/&gt;
 
-    &lt;body name="DE1_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE1_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE1_L_bar" type="capsule"
-            fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE1_L_end_site"
-            pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+    &lt;camera name="cam" mode="fixed"
+            pos="0 -0.5 0.10"
+            axisangle="1 0 0 90"/&gt;
 
-    &lt;body name="DF1_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF1_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF1_L_bar" type="capsule"
-            fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF1_L_end_site"
-            pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+    &lt;!-- CHASSIS at M, centered between left/right legs (y=0) --&gt;
+    &lt;body name="chassis" pos="{M[0]:.5f} 0 {M[1]:.5f}"&gt;
+      &lt;joint name="chassis_free" type="free"/&gt;
 
-  &lt;!-- Left-front D2_L --&gt;
-  &lt;body name="D2_L_body" pos="{D2_rel[0]:.5f} {-Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
-    &lt;geom name="D2_L_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.3 0.8 0.6 1"/&gt;
-    &lt;site name="D2_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+      &lt;!-- base + motor block (smaller) --&gt;
+      &lt;geom name="chassis_base" type="box" size="0.007 0.007 0.0045"
+            mass="{MASS_BASE:.4f}" rgba="0.6 0.6 0.6 1"/&gt;
+      &lt;geom name="motor_block" type="box" size="0.009 0.006 0.015"
+            mass="{MASS_MOTOR:.4f}" pos="0 0 0.03"
+            rgba="1 1 0.3 1"/&gt;
 
-    &lt;body name="DE2_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE2_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE2_L_bar" type="capsule"
-            fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE2_L_end_site"
-            pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+      &lt;!-- ========== D anchors (fixed on chassis) ========== --&gt;
 
-    &lt;body name="DF2_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF2_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF2_L_bar" type="capsule"
-            fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF2_L_end_site"
-            pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+      &lt;!-- Left-back D1_L --&gt;
+      &lt;body name="D1_L_body" pos="{D1_rel[0]:.5f} {-Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
+        &lt;geom name="D1_L_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.3 0.8 0.1 1"/&gt;
+        &lt;site name="D1_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-  &lt;!-- Right-back D1_R --&gt;
-  &lt;body name="D1_R_body" pos="{D1_rel[0]:.5f} {Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
-    &lt;geom name="D1_R_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.1 0.6 0.9 1"/&gt;
-    &lt;site name="D1_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;body name="DE1_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE1_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE1_L_bar" type="capsule"
+                fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE1_L_end_site"
+                pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-    &lt;body name="DE1_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE1_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE1_R_bar" type="capsule"
-            fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE1_R_end_site"
-            pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+        &lt;body name="DF1_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF1_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF1_L_bar" type="capsule"
+                fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF1_L_end_site"
+                pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-    &lt;body name="DF1_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF1_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF1_R_bar" type="capsule"
-            fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF1_R_end_site"
-            pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+      &lt;!-- Left-front D2_L --&gt;
+      &lt;body name="D2_L_body" pos="{D2_rel[0]:.5f} {-Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
+        &lt;geom name="D2_L_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.3 0.8 0.6 1"/&gt;
+        &lt;site name="D2_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-  &lt;!-- Right-front D2_R --&gt;
-  &lt;body name="D2_R_body" pos="{D2_rel[0]:.5f} {Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
-    &lt;geom name="D2_R_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.3 0.6 0.9 1"/&gt;
-    &lt;site name="D2_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;body name="DE2_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE2_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE2_L_bar" type="capsule"
+                fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE2_L_end_site"
+                pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-    &lt;body name="DE2_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE2_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE2_R_bar" type="capsule"
-            fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE2_R_end_site"
-            pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+        &lt;body name="DF2_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF2_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF2_L_bar" type="capsule"
+                fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF2_L_end_site"
+                pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-    &lt;body name="DF2_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF2_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF2_R_bar" type="capsule"
-            fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF2_R_end_site"
-            pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+      &lt;!-- Right-back D1_R --&gt;
+      &lt;body name="D1_R_body" pos="{D1_rel[0]:.5f} {Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
+        &lt;geom name="D1_R_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.1 0.6 0.9 1"/&gt;
+        &lt;site name="D1_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-  &lt;!-- ========== SINGLE crank root (ONE motor driving both MBs) ========== --&gt;
-  &lt;body name="crank_root" pos="{M_rel[0]:.5f} 0 {M_rel[2]:.5f}"&gt;
-    &lt;!-- single joint, single motor --&gt;
-    &lt;joint name="joint_L" type="hinge"
-           axis="0 1 0" range="-720 720" damping="0.01"/&gt;
+        &lt;body name="DE1_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE1_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE1_R_bar" type="capsule"
+                fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE1_R_end_site"
+                pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-    &lt;!-- ===== LEFT side: B_L ===== --&gt;
-    &lt;body name="B_L_body" pos="{B_rel[0]:.5f} {-Y_OFF:.5f} {B_rel[2]:.5f}"&gt;
-      &lt;!-- rod from B_L back to M --&gt;
-      &lt;geom name="MB_L_bar" type="capsule"
-            fromto="0 0 0   {-MB_scaled[0]:.5f} 0 {-MB_scaled[1]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0028"
-            rgba="0.1 0.1 0.1 1"/&gt;
+        &lt;body name="DF1_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF1_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF1_R_bar" type="capsule"
+                fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF1_R_end_site"
+                pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-      &lt;geom name="B_L_foot" type="sphere"
-            pos="0 0 0"
-            size="{fr:.4f}"
-            density="{DENS_FOOT:.1f}"
-            friction="0.5 0.005 0.0005"
-            contype="0" conaffinity="1"
-            rgba="0.8 0.2 0.2 1"/&gt;
+      &lt;!-- Right-front D2_R --&gt;
+      &lt;body name="D2_R_body" pos="{D2_rel[0]:.5f} {Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
+        &lt;geom name="D2_R_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.3 0.6 0.9 1"/&gt;
+        &lt;site name="D2_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-      &lt;!-- back left leg --&gt;
-      &lt;body name="BC1_L_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC1_L" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
+        &lt;body name="DE2_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE2_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE2_R_bar" type="capsule"
+                fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE2_R_end_site"
+                pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-        &lt;geom name="BC1_L_bar" type="capsule"
-              fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
+        &lt;body name="DF2_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF2_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF2_R_bar" type="capsule"
+                fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF2_R_end_site"
+                pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-        &lt;site name="F1_L_site"
-              pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
+      &lt;!-- ========== SINGLE crank root (ONE motor driving both MBs) ========== --&gt;
+      &lt;body name="crank_root" pos="{M_rel[0]:.5f} 0 {M_rel[2]:.5f}"&gt;
+        &lt;!-- single joint, single motor --&gt;
+        &lt;joint name="joint_L" type="hinge"
+               axis="0 1 0" range="-720 720" damping="0.01"/&gt;
 
-        &lt;body name="C1_L_body"
-              pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C1_L_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+        &lt;!-- ===== LEFT side: B_L ===== --&gt;
+        &lt;body name="B_L_body" pos="{B_rel[0]:.5f} {-Y_OFF:.5f} {B_rel[2]:.5f}"&gt;
+          &lt;!-- rod from B_L back to M --&gt;
+          &lt;geom name="MB_L_bar" type="capsule"
+                fromto="0 0 0   {-MB_scaled[0]:.5f} 0 {-MB_scaled[1]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0028"
+                rgba="0.1 0.1 0.1 1"/&gt;
 
-          &lt;body name="AC1_L_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA1_L" type="hinge"
+          &lt;geom name="B_L_foot" type="sphere"
+                pos="0 0 0"
+                size="{fr:.4f}"
+                density="{DENS_FOOT:.1f}"
+                friction="0.5 0.005 0.0005"
+                contype="0" conaffinity="1"
+                rgba="0.8 0.2 0.2 1"/&gt;
+
+          &lt;!-- back left leg --&gt;
+          &lt;body name="BC1_L_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC1_L" type="hinge"
                    axis="0 1 0" damping="0.001"/&gt;
 
-            &lt;geom name="AC1_L_bar" type="capsule"
-                  fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
+            &lt;geom name="BC1_L_bar" type="capsule"
+                  fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
                   density="{DENS_LEG:.1f}" size="0.0028"
                   rgba="0.15 0.15 0.15 1"/&gt;
 
-            &lt;site name="E1_L_site"
-                  pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
+            &lt;site name="F1_L_site"
+                  pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
                   size="0.001" rgba="0 0 0 0"/&gt;
 
-            &lt;body name="A1_L_body"
-                  pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A1_L_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.8 0.2 0.2 1"/&gt;
+            &lt;body name="C1_L_body"
+                  pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C1_L_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC1_L_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA1_L" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC1_L_bar" type="capsule"
+                      fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E1_L_site"
+                      pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A1_L_body"
+                      pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A1_L_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.8 0.2 0.2 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
+            &lt;/body&gt;
+          &lt;/body&gt;
+
+          &lt;!-- front left leg --&gt;
+          &lt;body name="BC2_L_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC2_L" type="hinge"
+                   axis="0 1 0" damping="0.001"/&gt;
+
+            &lt;geom name="BC2_L_bar" type="capsule"
+                  fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
+                  density="{DENS_LEG:.1f}" size="0.0028"
+                  rgba="0.15 0.15 0.15 1"/&gt;
+
+            &lt;site name="F2_L_site"
+                  pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
+                  size="0.001" rgba="0 0 0 0"/&gt;
+
+            &lt;body name="C2_L_body"
+                  pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C2_L_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC2_L_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA2_L" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC2_L_bar" type="capsule"
+                      fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E2_L_site"
+                      pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A2_L_body"
+                      pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A2_L_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.8 0.2 0.2 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
+            &lt;/body&gt;
+          &lt;/body&gt;
+        &lt;/body&gt;
+
+        &lt;!-- ===== RIGHT side: B_R, 180° around shaft ===== --&gt;
+        &lt;body name="B_R_body"
+              pos="{-B_rel[0]:.5f} {Y_OFF:.5f} {-B_rel[2]:.5f}"&gt;
+          &lt;!-- rod from B_R back to M (opposite direction) --&gt;
+          &lt;geom name="MB_R_bar" type="capsule"
+                fromto="0 0 0   {MB_scaled[0]:.5f} 0 {MB_scaled[1]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0028"
+                rgba="0.1 0.1 0.1 1"/&gt;
+
+          &lt;geom name="B_R_foot" type="sphere"
+                pos="0 0 0"
+                size="{FOOT_RADIUS:.4f}"
+                density="{DENS_FOOT:.1f}"
+                friction="0.5 0.005 0.0005"
+                contype="0" conaffinity="1"
+                rgba="0.2 0.8 0.4 1"/&gt;
+
+          &lt;!-- back right leg --&gt;
+          &lt;body name="BC1_R_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC1_R" type="hinge"
+                   axis="0 1 0" damping="0.001"/&gt;
+
+            &lt;geom name="BC1_R_bar" type="capsule"
+                  fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
+                  density="{DENS_LEG:.1f}" size="0.0028"
+                  rgba="0.15 0.15 0.15 1"/&gt;
+
+            &lt;site name="F1_R_site"
+                  pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
+                  size="0.001" rgba="0 0 0 0"/&gt;
+
+            &lt;body name="C1_R_body"
+                  pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C1_R_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC1_R_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA1_R" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC1_R_bar" type="capsule"
+                      fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E1_R_site"
+                      pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A1_R_body"
+                      pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A1_R_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.2 0.8 0.4 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
+            &lt;/body&gt;
+          &lt;/body&gt;
+
+          &lt;!-- front right leg --&gt;
+          &lt;body name="BC2_R_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC2_R" type="hinge"
+                   axis="0 1 0" damping="0.001"/&gt;
+
+            &lt;geom name="BC2_R_bar" type="capsule"
+                  fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
+                  density="{DENS_LEG:.1f}" size="0.0028"
+                  rgba="0.15 0.15 0.15 1"/&gt;
+
+            &lt;site name="F2_R_site"
+                  pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
+                  size="0.001" rgba="0 0 0 0"/&gt;
+
+            &lt;body name="C2_R_body"
+                  pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C2_R_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC2_R_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA2_R" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC2_R_bar" type="capsule"
+                      fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E2_R_site"
+                      pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A2_R_body"
+                      pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A2_R_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.2 0.8 0.4 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
             &lt;/body&gt;
           &lt;/body&gt;
         &lt;/body&gt;
       &lt;/body&gt;
 
-      &lt;!-- front left leg --&gt;
-      &lt;body name="BC2_L_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC2_L" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
+    &lt;/body&gt; &lt;!-- end chassis --&gt;
 
-        &lt;geom name="BC2_L_bar" type="capsule"
-              fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
+  &lt;/worldbody&gt;
 
-        &lt;site name="F2_L_site"
-              pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
+  &lt;!-- 4-bar equality constraints (DE/DF only) --&gt;
+  &lt;equality&gt;
+    &lt;!-- Left-back leg --&gt;
+    &lt;connect name="DE1_L_eq"
+             site1="DE1_L_end_site" site2="E1_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF1_L_eq"
+             site1="DF1_L_end_site" site2="F1_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
 
-        &lt;body name="C2_L_body"
-              pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C2_L_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+    &lt;!-- Left-front leg --&gt;
+    &lt;connect name="DE2_L_eq"
+             site1="DE2_L_end_site" site2="E2_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF2_L_eq"
+             site1="DF2_L_end_site" site2="F2_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
 
-          &lt;body name="AC2_L_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA2_L" type="hinge"
-                   axis="0 1 0" damping="0.001"/&gt;
+    &lt;!-- Right-back leg --&gt;
+    &lt;connect name="DE1_R_eq"
+             site1="DE1_R_end_site" site2="E1_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF1_R_eq"
+             site1="DF1_R_end_site" site2="F1_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
 
-            &lt;geom name="AC2_L_bar" type="capsule"
-                  fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
-                  density="{DENS_LEG:.1f}" size="0.0028"
-                  rgba="0.15 0.15 0.15 1"/&gt;
+    &lt;!-- Right-front leg --&gt;
+    &lt;connect name="DE2_R_eq"
+             site1="DE2_R_end_site" site2="E2_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF2_R_eq"
+             site1="DF2_R_end_site" site2="F2_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+  &lt;/equality&gt;
 
-            &lt;site name="E2_L_site"
-                  pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
-                  size="0.001" rgba="0 0 0 0"/&gt;
+  &lt;actuator&gt;
+    &lt;!-- one motor, one joint, positive torque only --&gt;
+    &lt;motor name="hip_motor" joint="joint_L"
+           gear="1.0" ctrlrange="0 {mt:.5f}"/&gt;
+  &lt;/actuator&gt;
 
-            &lt;body name="A2_L_body"
-                  pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A2_L_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.8 0.2 0.2 1"/&gt;
-            &lt;/body&gt;
-          &lt;/body&gt;
-        &lt;/body&gt;
-      &lt;/body&gt;
-    &lt;/body&gt;
-
-    &lt;!-- ===== RIGHT side: B_R, 180° around shaft ===== --&gt;
-    &lt;body name="B_R_body"
-          pos="{-B_rel[0]:.5f} {Y_OFF:.5f} {-B_rel[2]:.5f}"&gt;
-      &lt;!-- rod from B_R back to M (opposite direction) --&gt;
-      &lt;geom name="MB_R_bar" type="capsule"
-            fromto="0 0 0   {MB_scaled[0]:.5f} 0 {MB_scaled[1]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0028"
-            rgba="0.1 0.1 0.1 1"/&gt;
-
-      &lt;geom name="B_R_foot" type="sphere"
-            pos="0 0 0"
-            size="{FOOT_RADIUS:.4f}"
-            density="{DENS_FOOT:.1f}"
-            friction="0.5 0.005 0.0005"
-            contype="0" conaffinity="1"
-            rgba="0.2 0.8 0.4 1"/&gt;
-
-      &lt;!-- back right leg --&gt;
-      &lt;body name="BC1_R_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC1_R" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
-
-        &lt;geom name="BC1_R_bar" type="capsule"
-              fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
-
-        &lt;site name="F1_R_site"
-              pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
-
-        &lt;body name="C1_R_body"
-              pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C1_R_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
-
-          &lt;body name="AC1_R_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA1_R" type="hinge"
-                   axis="0 1 0" damping="0.001"/&gt;
-
-            &lt;geom name="AC1_R_bar" type="capsule"
-                  fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
-                  density="{DENS_LEG:.1f}" size="0.0028"
-                  rgba="0.15 0.15 0.15 1"/&gt;
-
-            &lt;site name="E1_R_site"
-                  pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
-                  size="0.001" rgba="0 0 0 0"/&gt;
-
-            &lt;body name="A1_R_body"
-                  pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A1_R_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.2 0.8 0.4 1"/&gt;
-            &lt;/body&gt;
-          &lt;/body&gt;
-        &lt;/body&gt;
-      &lt;/body&gt;
-
-      &lt;!-- front right leg --&gt;
-      &lt;body name="BC2_R_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC2_R" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
-
-        &lt;geom name="BC2_R_bar" type="capsule"
-              fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
-
-        &lt;site name="F2_R_site"
-              pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
-
-        &lt;body name="C2_R_body"
-              pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C2_R_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
-
-          &lt;body name="AC2_R_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA2_R" type="hinge"
-                   axis="0 1 0" damping="0.001"/&gt;
-
-            &lt;geom name="AC2_R_bar" type="capsule"
-                  fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
-                  density="{DENS_LEG:.1f}" size="0.0028"
-                  rgba="0.15 0.15 0.15 1"/&gt;
-
-            &lt;site name="E2_R_site"
-                  pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
-                  size="0.001" rgba="0 0 0 0"/&gt;
-
-            &lt;body name="A2_R_body"
-                  pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A2_R_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.2 0.8 0.4 1"/&gt;
-            &lt;/body&gt;
-          &lt;/body&gt;
-        &lt;/body&gt;
-      &lt;/body&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
-
-&lt;/body&gt; &lt;!-- end chassis --&gt;
-</code></pre>
-<p></p>
-<!-- 4-bar equality constraints (DE/DF only) -->
-<p><equality>
-    <!-- Left-back leg -->
-    <connect name="DE1_L_eq" site1="DE1_L_end_site" site2="E1_L_site" solref="0.005 1" solimp="0.8 0.95 0.001">
-    <connect name="DF1_L_eq" site1="DF1_L_end_site" site2="F1_L_site" solref="0.005 1" solimp="0.8 0.95 0.001"></connect></connect></equality></p>
-<pre><code>&lt;!-- Left-front leg --&gt;
-&lt;connect name="DE2_L_eq"
-         site1="DE2_L_end_site" site2="E2_L_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-&lt;connect name="DF2_L_eq"
-         site1="DF2_L_end_site" site2="F2_L_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-
-&lt;!-- Right-back leg --&gt;
-&lt;connect name="DE1_R_eq"
-         site1="DE1_R_end_site" site2="E1_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-&lt;connect name="DF1_R_eq"
-         site1="DF1_R_end_site" site2="F1_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-
-&lt;!-- Right-front leg --&gt;
-&lt;connect name="DE2_R_eq"
-         site1="DE2_R_end_site" site2="E2_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-&lt;connect name="DF2_R_eq"
-         site1="DF2_R_end_site" site2="F2_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-</code></pre>
-<p></p>
-<p><actuator>
-    <!-- one motor, one joint, positive torque only -->
-    <motor name="hip_motor" joint="joint_L" gear="1.0" ctrlrange="0 {mt:.5f}">
-  </motor></actuator></p>
-<p>
+&lt;/mujoco&gt;
 """
-    return xml</p>
-<p>'''</p>
-<h1 id="-mujoco-xml-4-legs-6-feet-1-motor-_1">---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------</h1>
+    return xml
+</code></pre></div>
+<h1 id="-mujoco-xml-4-legs-6-feet-1-motor-">---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------</h1>
 <p>DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
 <br>
@@ -1506,8 +1522,8 @@ xml = f"""
   </motor></actuator></p>
 <p>
 """
-'''</p>
-<p>'''</p>
+</p><div class="highlight"><pre><span></span><code>
+</code></pre></div><p></p>
 <h1 id="-simulation-code-">---------------- Simulation code ----------------</h1>
 <p>def run_fourleg() -&gt; Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
     model = mujoco.MjModel.from_xml_string(DYN_FOURLEG_XML)
@@ -1652,8 +1668,8 @@ logs = {
 
 return frames, model, data, logs, frame_times
 </code></pre>
-<p>'''</p>
-<p>'''</p>
+<div class="highlight"><pre><span></span><code>
+</code></pre></div>
 <p>def plot_results(logs):
     t        = logs["t"]
     q        = logs["q"]
@@ -1716,8 +1732,8 @@ ax_rpy.legend(fontsize=8, loc="upper left")
 fig.tight_layout()
 plt.show()
 </code></pre>
-<p>'''</p>
-<p>'''
+<p></p><div class="highlight"><pre><span></span><code>
+</code></pre></div>
 def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
     t        = logs["t"]
     q        = logs["q"]
@@ -1726,7 +1742,7 @@ def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[floa
     tau      = logs["tau"]
     base_xyz = logs["base_xyz"]
     base_rpy = logs["base_rpy"]
-    joint_names = logs["joint_names"]</p>
+    joint_names = logs["joint_names"]<p></p>
 <pre><code>if t.size == 0:
     print("No logged data to animate.")
     return
@@ -1933,28 +1949,30 @@ if SAVE_ANIMATION:
 # else:
 #     plot_results(logs)
 </code></pre>
-<p>'''</p>
-<h1 id="part-2-optimize-your-design">Part 2: Optimize your design</h1>
-<p>Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?</p>
-<ol>
-<li>This may require you to develop an XML template and regenerate your model programmatically as needed</li>
-</ol>
-<p>We pick motor torque limit (MAX_TORQUE_SIM) as the example design parameter (it's physically meaningful for the actuator-limited crank drive). It can be swaped with any other scalar parameter (crank length, foot radius, lateral offset Y_OFF, mass, damping, etc.) by changing the param_name and where it’s substituted in the XML template.</p>
-<ol>
-<li>Select a metric that describes the performance of your robot. This may be robot speed, overal distance travlled in a certain direction, efficiency, etc.</li>
-</ol>
-<p><strong>Metric definitions</strong></p>
-<p>We compute two metrics per simulation run:</p>
-<ul>
-<li>Forward Distance (m) — base_x_final - base_x_initial (use base world x position from data.qpos or data.site_xpos if you prefer a specific site).</li>
-<li>Energy used (J) — numerical integral over simulation of actuator power: sum(|tau * joint_vel| * dt) where tau is data.qfrc_actuator for the motor and joint_vel is the motor joint velocity. We use absolute work approximated by |torque * angular_velocity| * dt. Optionally divide distance by energy for efficiency (m/J).</li>
-</ul>
-<p>Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, F1_L_site, D1_L_site, and possibly the chassis motor_block geom). To measure chassis base world position, we'll use the free body joint chassis_free qpos (first three elements of data.qpos at the base qpos address), which you already logged in base_xyz_log. That avoids any extra <sensor> syntax and is reliable.</sensor></site></p>
-<ol>
-<li>Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.</li>
-</ol>
-<p>Below is the code for the sweep and the results.</p>
-<p>'''</p>
+<div class="highlight"><pre><span></span><code># Part 2: Optimize your design
+
+Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
+
+1. This may require you to develop an XML template and regenerate your model programmatically as needed
+
+We pick motor torque limit (MAX_TORQUE_SIM) as the example design parameter (it's physically meaningful for the actuator-limited crank drive). It can be swaped with any other scalar parameter (crank length, foot radius, lateral offset Y_OFF, mass, damping, etc.) by changing the param_name and where it’s substituted in the XML template.
+
+2. Select a metric that describes the performance of your robot. This may be robot speed, overal distance travlled in a certain direction, efficiency, etc.
+
+**Metric definitions**
+
+We compute two metrics per simulation run:
+
+- Forward Distance (m) — base_x_final - base_x_initial (use base world x position from data.qpos or data.site_xpos if you prefer a specific site).
+- Energy used (J) — numerical integral over simulation of actuator power: sum(|tau * joint_vel| * dt) where tau is data.qfrc_actuator for the motor and joint_vel is the motor joint velocity. We use absolute work approximated by |torque * angular_velocity| * dt. Optionally divide distance by energy for efficiency (m/J).
+
+
+Our XML already contains many &lt;site&gt; elements (e.g., DE1_L_end_site, E1_L_site, F1_L_site, D1_L_site, and possibly the chassis motor_block geom). To measure chassis base world position, we'll use the free body joint chassis_free qpos (first three elements of data.qpos at the base qpos address), which you already logged in base_xyz_log. That avoids any extra &lt;sensor&gt; syntax and is reliable.
+
+4. Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.
+
+Below is the code for the sweep and the results.
+</code></pre></div>
 <h1 id="add-these-imports-at-top-if-not-already-present">Add these imports at top if not already present</h1>
 <p>import math
 import numpy as np
@@ -1963,19 +1981,19 @@ import mujoco
 from typing import List, Tuple
 import copy
 import io</p>
-<h1 id="-_2">--------------------------------------------------------------------</h1>
+<h1 id="-">--------------------------------------------------------------------</h1>
 <h1 id="utility-create-an-xml-from-your-original-dyn_fourleg_xml-by-replacing">Utility: create an XML from your original DYN_FOURLEG_XML by replacing</h1>
 <h1 id="a-parameter-placeholder-this-assumes-your-dyn_fourleg_xml-contains">a parameter placeholder. This assumes your DYN_FOURLEG_XML contains</h1>
 <h1 id="a-format-placeholder-like-max_torque_sim5f-already-as-in-your-file">a format placeholder like {MAX_TORQUE_SIM:.5f} already (as in your file).</h1>
 <h1 id="if-your-template-doesnt-include-a-placeholder-modify-the-template">If your template doesn't include a placeholder, modify the template</h1>
 <h1 id="to-contain-a-unique-token-eg-max_torque-and-replace-that-string">to contain a unique token, e.g. "<strong>MAX_TORQUE</strong>" and replace that string.</h1>
-<h1 id="-_3">--------------------------------------------------------------------</h1>
+<h1 id="-_1">--------------------------------------------------------------------</h1>
 <h1 id="def-generate_fourleg_xmlcrank_scale-float-10-does-the-job">def generate_fourleg_xml(crank_scale: float = 1.0, does the job</h1>
-<h1 id="-_4">--------------------------------------------------------------------</h1>
+<h1 id="-_2">--------------------------------------------------------------------</h1>
 <h1 id="run-one-simulation-given-an-xml-string-returning-metrics-and-logs">Run one simulation given an XML string, returning metrics and logs.</h1>
 <h1 id="this-wraps-your-existing-run_fourleg-but-allows-passing-in">This wraps your existing run_fourleg() but allows passing in</h1>
 <h1 id="a-custom-xml-string-instead-of-the-module-level-dyn_fourleg_xml">a custom XML string instead of the module-level DYN_FOURLEG_XML.</h1>
-<h1 id="-_5">--------------------------------------------------------------------</h1>
+<h1 id="-_3">--------------------------------------------------------------------</h1>
 <p>def run_sim_from_xml(xml_string: str, duration: float = 6.0, framerate: int = 30) -&gt; Tuple[dict, List[np.ndarray]]:
     """
     Build model from xml_string, run simulation, and return (logs, frames).
@@ -2080,9 +2098,9 @@ logs = {
 
 return logs, frames
 </code></pre>
-<h1 id="-_6">--------------------------------------------------------------------</h1>
+<h1 id="-_4">--------------------------------------------------------------------</h1>
 <h1 id="compute-metrics-from-logs">Compute metrics from logs</h1>
-<h1 id="-_7">--------------------------------------------------------------------</h1>
+<h1 id="-_5">--------------------------------------------------------------------</h1>
 <p>def compute_metrics_from_logs(logs: dict, dt_est: float) -&gt; dict:
     """
     Given logs dictionary (as returned above) and dt sampling,
@@ -2120,9 +2138,9 @@ efficiency = distance / energy if energy &gt; 1e-12 else 0.0
 
 return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": dt}
 </code></pre>
-<h1 id="-_8">--------------------------------------------------------------------</h1>
+<h1 id="-_6">--------------------------------------------------------------------</h1>
 <h1 id="sweep-a-parameter-eg-max_torque_sim-across-values-and-collect-metrics">Sweep a parameter (e.g. MAX_TORQUE_SIM) across values and collect metrics</h1>
-<h1 id="-_9">--------------------------------------------------------------------</h1>
+<h1 id="-_7">--------------------------------------------------------------------</h1>
 <p>def parameter_sweep(param_name: str, param_values: List[float], duration: float = 6.0, render: bool = False) -&gt; dict:
     results = {"param": [], "distance": [], "energy": [], "efficiency": []}</p>
 <pre><code>for val in param_values:
@@ -2152,9 +2170,9 @@ return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": 
 
 return results
 </code></pre>
-<h1 id="-_10">--------------------------------------------------------------------</h1>
+<h1 id="-_8">--------------------------------------------------------------------</h1>
 <h1 id="simple-plotting-helper-visualize-results">Simple plotting helper (visualize results)</h1>
-<h1 id="-_11">--------------------------------------------------------------------</h1>
+<h1 id="-_9">--------------------------------------------------------------------</h1>
 <p>def plot_sweep_results(results: dict, param_name: str):
     params = np.array(results["param"])
     dist = np.array(results["distance"])
@@ -2206,22 +2224,22 @@ plot_sweep_results(results, "MAX_TORQUE_SIM")
 # Now animate only once:
 # animate_results(frames, logs, logs.get("t", None))   # MP4 saved only once
 </code></pre>
-<p>'''</p>
-<p><strong>Intepretation</strong></p>
-<p>Increasing torque limit typically increases the motor’s ability to maintain commanded angular speed under load, which tends to increase stride amplitude, resulting in larger forward displacement per cycle — up to the point where other mechanical limits (link geometry, contact slipping) dominate.</p>
-<p>Energy will almost certainly increase as you raise torque limit (more torque × velocity) — so efficiency (m/J) may peak at intermediate torque (where increased stride gives large distance for relatively moderate additional energy) and then drop if energy use grows faster than distance.</p>
-<p>If the motor torque is too small, the robot may barely move the crank and distance ~ 0.</p>
-<p>Plotting distance and energy versus MAX_TORQUE_SIM will show these trends.</p>
-<ol>
-<li>
-<p>Select an approach to further maximize your selected performance metric. This may be an optimization / minimization function, or a (finer-grained) global approach.</p>
-</li>
-<li>
-<p>Vary the same value in your prototype. How does performance change in your in real-life?</p>
-</li>
-</ol>
-<p>I am implementing 5 and 6 together in the following code by providing the function first and then provide different torque_values = np.linspace(0.02, 0.10, 5). For question 6, our prototype in life is still in progress. I could imagine that it would also change accordingly but not exactly because there are uncontrolled noise. </p>
-<p>'''</p>
+<div class="highlight"><pre><span></span><code>**Intepretation**
+
+Increasing torque limit typically increases the motor’s ability to maintain commanded angular speed under load, which tends to increase stride amplitude, resulting in larger forward displacement per cycle — up to the point where other mechanical limits (link geometry, contact slipping) dominate.
+
+Energy will almost certainly increase as you raise torque limit (more torque × velocity) — so efficiency (m/J) may peak at intermediate torque (where increased stride gives large distance for relatively moderate additional energy) and then drop if energy use grows faster than distance.
+
+If the motor torque is too small, the robot may barely move the crank and distance ~ 0.
+
+Plotting distance and energy versus MAX_TORQUE_SIM will show these trends.
+
+5. Select an approach to further maximize your selected performance metric. This may be an optimization / minimization function, or a (finer-grained) global approach.
+
+6. Vary the same value in your prototype. How does performance change in your in real-life?
+
+I am implementing 5 and 6 together in the following code by providing the function first and then provide different torque_values = np.linspace(0.02, 0.10, 5). For question 6, our prototype in life is still in progress. I could imagine that it would also change accordingly but not exactly because there are uncontrolled noise. 
+</code></pre></div>
 <h1 id="tell-animator-which-joints-correspond-to-qdq-ordering-used-in-logs">tell animator which joint(s) correspond to q/dq ordering used in logs</h1>
 <p>logs["joint_names"] = logs.get("joint_names", ["joint_L"])</p>
 <h1 id="buildrepair-a-frame_times-array-that-lines-up-with-frames">Build/repair a frame_times array that lines up with frames</h1>
@@ -2306,7 +2324,7 @@ except Exception as e:
 <h1 id="fine-nplinspacelow-high-20">fine = np.linspace(low, high, 20)</h1>
 <h1 id="results2-parameter_sweepmax_torque_sim-fine-durationduration">results2 = parameter_sweep("MAX_TORQUE_SIM", fine, duration=DURATION)</h1>
 <h1 id="plot_sweep_resultsresults2-max_torque_sim">plot_sweep_results(results2, "MAX_TORQUE_SIM")</h1>
-<p>'''</p>
+<p>```</p>
 <ol>
 <li>Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.</li>
 </ol>
@@ -2391,13 +2409,12 @@ Validate simulation trends (distance, actuator energy, and efficiency vs. motor 
 <p>e. <strong>Parameter sweep</strong>
    - Select torque values matching simulation sweep (coarse then fine).
    - For each torque value, run the N replicates and store logs in uniquely named folders/files:
-     </p><div class="highlight"><pre><span></span><code>&lt;experiment&gt;/&lt;date&gt;/
-  torque_0.020/run_01/
-    log.csv
-    video.mp4
-  torque_0.020/run_02/ ...
-</code></pre></div>
-   - Capture video (external camera) for later qualitative analysis.<p></p>
+     <code>&lt;experiment&gt;/&lt;date&gt;/
+       torque_0.020/run_01/
+         log.csv
+         video.mp4
+       torque_0.020/run_02/ ...</code>
+   - Capture video (external camera) for later qualitative analysis.</p>
 <p>f. <strong>Data processing &amp; metrics computation</strong>
 - Synchronize logs (use timestamp or sync pulse). Resample to a common rate (e.g., 200 Hz).
 - Compute:
