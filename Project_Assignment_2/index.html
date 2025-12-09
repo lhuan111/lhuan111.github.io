@@ -1964,140 +1964,140 @@ if __name__ == "__main__":
 <ol>
 <li>Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.</li>
 </ol>
-<p>Below is the code for the sweep and the results.
-</p><div class="highlight"><pre><span></span><code>
-</code></pre></div><p></p>
-<h1 id="add-these-imports-at-top-if-not-already-present">Add these imports at top if not already present</h1>
-<p>import math
+<p>Below is the code for the sweep and the results.</p>
+<div class="highlight"><pre><span></span><code># Add these imports at top if not already present
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import mujoco
 from typing import List, Tuple
 import copy
-import io</p>
-<h1 id="-">--------------------------------------------------------------------</h1>
-<h1 id="utility-create-an-xml-from-your-original-dyn_fourleg_xml-by-replacing">Utility: create an XML from your original DYN_FOURLEG_XML by replacing</h1>
-<h1 id="a-parameter-placeholder-this-assumes-your-dyn_fourleg_xml-contains">a parameter placeholder. This assumes your DYN_FOURLEG_XML contains</h1>
-<h1 id="a-format-placeholder-like-max_torque_sim5f-already-as-in-your-file">a format placeholder like {MAX_TORQUE_SIM:.5f} already (as in your file).</h1>
-<h1 id="if-your-template-doesnt-include-a-placeholder-modify-the-template">If your template doesn't include a placeholder, modify the template</h1>
-<h1 id="to-contain-a-unique-token-eg-max_torque-and-replace-that-string">to contain a unique token, e.g. "<strong>MAX_TORQUE</strong>" and replace that string.</h1>
-<h1 id="-_1">--------------------------------------------------------------------</h1>
-<h1 id="def-generate_fourleg_xmlcrank_scale-float-10-does-the-job">def generate_fourleg_xml(crank_scale: float = 1.0, does the job</h1>
-<div class="highlight"><pre><span></span><code>
+import io
+
+# --------------------------------------------------------------------
+# Utility: create an XML from your original DYN_FOURLEG_XML by replacing
+# a parameter placeholder. This assumes your DYN_FOURLEG_XML contains
+# a format placeholder like {MAX_TORQUE_SIM:.5f} already (as in your file).
+# If your template doesn't include a placeholder, modify the template
+# to contain a unique token, e.g. "__MAX_TORQUE__" and replace that string.
+# --------------------------------------------------------------------
+
+#def generate_fourleg_xml(crank_scale: float = 1.0, does the job
 </code></pre></div>
-<h1 id="-_2">--------------------------------------------------------------------</h1>
-<h1 id="run-one-simulation-given-an-xml-string-returning-metrics-and-logs">Run one simulation given an XML string, returning metrics and logs.</h1>
-<h1 id="this-wraps-your-existing-run_fourleg-but-allows-passing-in">This wraps your existing run_fourleg() but allows passing in</h1>
-<h1 id="a-custom-xml-string-instead-of-the-module-level-dyn_fourleg_xml">a custom XML string instead of the module-level DYN_FOURLEG_XML.</h1>
-<h1 id="-_3">--------------------------------------------------------------------</h1>
-<p>def run_sim_from_xml(xml_string: str, duration: float = 6.0, framerate: int = 30) -&gt; Tuple[dict, List[np.ndarray]]:
+<div class="highlight"><pre><span></span><code># --------------------------------------------------------------------
+# Run one simulation given an XML string, returning metrics and logs.
+# This wraps your existing run_fourleg() but allows passing in
+# a custom XML string instead of the module-level DYN_FOURLEG_XML.
+# --------------------------------------------------------------------
+def run_sim_from_xml(xml_string: str, duration: float = 6.0, framerate: int = 30) -&gt; Tuple[dict, List[np.ndarray]]:
     """
     Build model from xml_string, run simulation, and return (logs, frames).
     'logs' contains t, q, dq, u, tau, base_xyz, base_rpy as in your run_fourleg.
     """
     model = mujoco.MjModel.from_xml_string(xml_string)
-    data = mujoco.MjData(model)</p>
-<pre><code># find motor + base joint addresses as in your script
-# joint name 'joint_L' and 'chassis_free' are used in your template
-try:
-    jid  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "joint_L")
-except Exception:
-    raise RuntimeError("motor joint 'joint_L' not found in XML")
+    data = mujoco.MjData(model)
 
-qadr = model.jnt_qposadr[jid]
-dadr = model.jnt_dofadr[jid]
+    # find motor + base joint addresses as in your script
+    # joint name 'joint_L' and 'chassis_free' are used in your template
+    try:
+        jid  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "joint_L")
+    except Exception:
+        raise RuntimeError("motor joint 'joint_L' not found in XML")
 
-jid_base = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "chassis_free")
-qadr_base = model.jnt_qposadr[jid_base]
+    qadr = model.jnt_qposadr[jid]
+    dadr = model.jnt_dofadr[jid]
 
-dt = model.opt.timestep
-steps = int(duration / dt)
+    jid_base = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "chassis_free")
+    qadr_base = model.jnt_qposadr[jid_base]
 
-# same ramp/gains as your working script; you can parameterize if you want
-# initialize motor angle slightly away from singular pose like your original code
-data.qpos[qadr] = math.radians(-20.0)
+    dt = model.opt.timestep
+    steps = int(duration / dt)
 
-renderer = mujoco.Renderer(model, width=WIDTH, height=HEIGHT)
-frames: List[np.ndarray] = []
+    # same ramp/gains as your working script; you can parameterize if you want
+    # initialize motor angle slightly away from singular pose like your original code
+    data.qpos[qadr] = math.radians(-20.0)
 
-# prepare logging structures
-t_log, q_log, dq_log, u_log, tau_log = [], [], [], [], []
-base_xyz_log, base_rpy_log = [], []
+    renderer = mujoco.Renderer(model, width=WIDTH, height=HEIGHT)
+    frames: List[np.ndarray] = []
 
-# for sample keeping, use relatively coarse sampling to keep arrays small
-sample_skip = max(1, int(round(1.0 / (dt * 200.0))))  # ~200 Hz logging -- adjust if needed
+    # prepare logging structures
+    t_log, q_log, dq_log, u_log, tau_log = [], [], [], [], []
+    base_xyz_log, base_rpy_log = [], []
 
-# compute steps per renderer frame robustly
-steps_per_frame = max(1, int(round(1.0 / (dt * framerate))))
+    # for sample keeping, use relatively coarse sampling to keep arrays small
+    sample_skip = max(1, int(round(1.0 / (dt * 200.0))))  # ~200 Hz logging -- adjust if needed
 
-# control gains: reuse from original script OR override here
-# keep consistent with your original definitions
-# KP_VEL computed outside in module; if not available, recompute here:
-# KP_VEL = 0.7 * (MAX_TORQUE_SIM / OMEGA_DES) # but we don't have MAX_TORQUE here necessarily
-# We'll use PD-like ramp towards OMEGA_DES using data.qvel
+    # compute steps per renderer frame robustly
+    steps_per_frame = max(1, int(round(1.0 / (dt * framerate))))
 
-for k in range(steps):
-    t = k * dt
+    # control gains: reuse from original script OR override here
+    # keep consistent with your original definitions
+    # KP_VEL computed outside in module; if not available, recompute here:
+    # KP_VEL = 0.7 * (MAX_TORQUE_SIM / OMEGA_DES) # but we don't have MAX_TORQUE here necessarily
+    # We'll use PD-like ramp towards OMEGA_DES using data.qvel
 
-    # compute desired ramped omega (identical to your working code)
-    ramp_T = 0.45
-    phase = min(1.0, t / ramp_T)
-    omega_cmd = phase * OMEGA_DES
+    for k in range(steps):
+        t = k * dt
 
-    dq = data.qvel[dadr]
-    err = omega_cmd - dq
+        # compute desired ramped omega (identical to your working code)
+        ramp_T = 0.45
+        phase = min(1.0, t / ramp_T)
+        omega_cmd = phase * OMEGA_DES
 
-    # estimate torque using the model's ctrlrange and a gain; we may read ctrlrange from model.actuator
-    # but simplest: proportional gain using actuator ctrlrange high end (assume single motor actuator)
-    max_ctrl = float(model.actuator_ctrlrange[0][1]) if getattr(model, "actuator_ctrlrange", None) is not None else MAX_TORQUE_SIM
-    kp = 0.7 * (max_ctrl / (OMEGA_DES if OMEGA_DES &gt; 1e-9 else 1.0))
-    tau = kp * err
-    tau = max(0.0, min(max_ctrl, tau))
-    data.ctrl[0] = tau
+        dq = data.qvel[dadr]
+        err = omega_cmd - dq
 
-    mujoco.mj_step(model, data)
+        # estimate torque using the model's ctrlrange and a gain; we may read ctrlrange from model.actuator
+        # but simplest: proportional gain using actuator ctrlrange high end (assume single motor actuator)
+        max_ctrl = float(model.actuator_ctrlrange[0][1]) if getattr(model, "actuator_ctrlrange", None) is not None else MAX_TORQUE_SIM
+        kp = 0.7 * (max_ctrl / (OMEGA_DES if OMEGA_DES &gt; 1e-9 else 1.0))
+        tau = kp * err
+        tau = max(0.0, min(max_ctrl, tau))
+        data.ctrl[0] = tau
 
-    # log every sample_skip steps
-    if k % sample_skip == 0:
-        t_log.append(t)
-        q_log.append(np.array([data.qpos[qadr]]))
-        dq_log.append(np.array([data.qvel[dadr]]))
-        u_log.append(float(data.ctrl[0]))
-        tau_log.append(float(data.qfrc_actuator[dadr]))
+        mujoco.mj_step(model, data)
 
-        base_xyz = data.qpos[qadr_base : qadr_base + 3].copy()
-        base_quat = data.qpos[qadr_base + 3 : qadr_base + 7].copy()
-        base_rpy = quat_to_rpy(base_quat)
-        base_xyz_log.append(base_xyz)
-        base_rpy_log.append(base_rpy)
+        # log every sample_skip steps
+        if k % sample_skip == 0:
+            t_log.append(t)
+            q_log.append(np.array([data.qpos[qadr]]))
+            dq_log.append(np.array([data.qvel[dadr]]))
+            u_log.append(float(data.ctrl[0]))
+            tau_log.append(float(data.qfrc_actuator[dadr]))
 
-    # capture frames at the desired framerate
-    if k % steps_per_frame == 0:
+            base_xyz = data.qpos[qadr_base : qadr_base + 3].copy()
+            base_quat = data.qpos[qadr_base + 3 : qadr_base + 7].copy()
+            base_rpy = quat_to_rpy(base_quat)
+            base_xyz_log.append(base_xyz)
+            base_rpy_log.append(base_rpy)
+
+        # capture frames at the desired framerate
+        if k % steps_per_frame == 0:
+            renderer.update_scene(data, camera="cam")
+            frames.append(renderer.render().copy())
+
+    # ensure final frame included
+    final_time = min(duration, steps * dt)
+    if not frames or len(frames) and (len(frames) &lt; int(round(framerate * duration))):
         renderer.update_scene(data, camera="cam")
         frames.append(renderer.render().copy())
 
-# ensure final frame included
-final_time = min(duration, steps * dt)
-if not frames or len(frames) and (len(frames) &lt; int(round(framerate * duration))):
-    renderer.update_scene(data, camera="cam")
-    frames.append(renderer.render().copy())
+    logs = {
+        "t": np.asarray(t_log),
+        "q": np.vstack(q_log) if q_log else np.zeros((0, 1)),
+        "dq": np.vstack(dq_log) if dq_log else np.zeros((0, 1)),
+        "u": np.asarray(u_log),
+        "tau": np.asarray(tau_log),
+        "base_xyz": np.vstack(base_xyz_log) if base_xyz_log else np.zeros((0, 3)),
+        "base_rpy": np.vstack(base_rpy_log) if base_rpy_log else np.zeros((0, 3)),
+    }
 
-logs = {
-    "t": np.asarray(t_log),
-    "q": np.vstack(q_log) if q_log else np.zeros((0, 1)),
-    "dq": np.vstack(dq_log) if dq_log else np.zeros((0, 1)),
-    "u": np.asarray(u_log),
-    "tau": np.asarray(tau_log),
-    "base_xyz": np.vstack(base_xyz_log) if base_xyz_log else np.zeros((0, 3)),
-    "base_rpy": np.vstack(base_rpy_log) if base_rpy_log else np.zeros((0, 3)),
-}
+    return logs, frames
 
-return logs, frames
-</code></pre>
-<h1 id="-_4">--------------------------------------------------------------------</h1>
-<h1 id="compute-metrics-from-logs">Compute metrics from logs</h1>
-<h1 id="-_5">--------------------------------------------------------------------</h1>
-<p>def compute_metrics_from_logs(logs: dict, dt_est: float) -&gt; dict:
+# --------------------------------------------------------------------
+# Compute metrics from logs
+# --------------------------------------------------------------------
+def compute_metrics_from_logs(logs: dict, dt_est: float) -&gt; dict:
     """
     Given logs dictionary (as returned above) and dt sampling,
     compute:
@@ -2110,137 +2110,140 @@ return logs, frames
     q = logs["q"]
     dq = logs["dq"]
     tau = logs["tau"]
-    base_xyz = logs["base_xyz"]</p>
-<pre><code>if t.size == 0:
-    return {"distance": 0.0, "energy": 0.0, "efficiency": 0.0}
+    base_xyz = logs["base_xyz"]
 
-# base x displacement
-x0 = float(base_xyz[0, 0])
-xf = float(base_xyz[-1, 0])
-distance = xf - x0
+    if t.size == 0:
+        return {"distance": 0.0, "energy": 0.0, "efficiency": 0.0}
 
-# estimate dt from t vector if possible
-if t.size &gt; 1:
-    dt = float(np.mean(np.diff(t)))
-else:
-    dt = dt_est
+    # base x displacement
+    x0 = float(base_xyz[0, 0])
+    xf = float(base_xyz[-1, 0])
+    distance = xf - x0
 
-# actuator energy approximate: sum(|tau * omega| * dt)
-# tau and dq arrays correspond to control-sampled indices
-power = np.abs(tau * dq.flatten())  # elementwise abs product
-energy = float(np.sum(power) * dt)
-
-efficiency = distance / energy if energy &gt; 1e-12 else 0.0
-
-return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": dt}
-</code></pre>
-<h1 id="-_6">--------------------------------------------------------------------</h1>
-<h1 id="sweep-a-parameter-eg-max_torque_sim-across-values-and-collect-metrics">Sweep a parameter (e.g. MAX_TORQUE_SIM) across values and collect metrics</h1>
-<h1 id="-_7">--------------------------------------------------------------------</h1>
-<p>def parameter_sweep(param_name: str, param_values: List[float], duration: float = 6.0, render: bool = False) -&gt; dict:
-    results = {"param": [], "distance": [], "energy": [], "efficiency": []}</p>
-<pre><code>for val in param_values:
-    # Build parameterized XML
-    if param_name == "MAX_TORQUE_SIM":
-        xml = generate_fourleg_xml(max_torque=val)
-    elif param_name == "crank_scale":
-        xml = generate_fourleg_xml(crank_scale=val)
-    elif param_name == "foot_radius":
-        xml = generate_fourleg_xml(foot_radius=val)
+    # estimate dt from t vector if possible
+    if t.size &gt; 1:
+        dt = float(np.mean(np.diff(t)))
     else:
-        raise ValueError(f"Unknown sweep parameter: {param_name}")
+        dt = dt_est
 
-    # Run simulation WITHOUT rendering (fast for sweeps)
-    logs, frames = run_sim_from_xml(xml, duration=duration, framerate=FRAMERATE)
+    # actuator energy approximate: sum(|tau * omega| * dt)
+    # tau and dq arrays correspond to control-sampled indices
+    power = np.abs(tau * dq.flatten())  # elementwise abs product
+    energy = float(np.sum(power) * dt)
 
-    # Compute metrics
-    dt_est = 0.0002
-    metrics = compute_metrics_from_logs(logs, dt_est)
+    efficiency = distance / energy if energy &gt; 1e-12 else 0.0
 
-    results["param"].append(val)
-    results["distance"].append(metrics["distance"])
-    results["energy"].append(metrics["energy"])
-    results["efficiency"].append(metrics["efficiency"])
+    return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": dt}
 
-    print(f"param={val:.5f} -&gt; dist={metrics['distance']:.4f} m, energy={metrics['energy']:.6f} J, eff={metrics['efficiency']:.6f}")
+# --------------------------------------------------------------------
+# Sweep a parameter (e.g. MAX_TORQUE_SIM) across values and collect metrics
+# --------------------------------------------------------------------
+def parameter_sweep(param_name: str, param_values: List[float], duration: float = 6.0, render: bool = False) -&gt; dict:
+    results = {"param": [], "distance": [], "energy": [], "efficiency": []}
 
-return results
-</code></pre>
-<p><code></code></p>
-<h1 id="-_8">--------------------------------------------------------------------</h1>
-<h1 id="simple-plotting-helper-visualize-results">Simple plotting helper (visualize results)</h1>
-<h1 id="-_9">--------------------------------------------------------------------</h1>
-<p>def plot_sweep_results(results: dict, param_name: str):
+    for val in param_values:
+        # Build parameterized XML
+        if param_name == "MAX_TORQUE_SIM":
+            xml = generate_fourleg_xml(max_torque=val)
+        elif param_name == "crank_scale":
+            xml = generate_fourleg_xml(crank_scale=val)
+        elif param_name == "foot_radius":
+            xml = generate_fourleg_xml(foot_radius=val)
+        else:
+            raise ValueError(f"Unknown sweep parameter: {param_name}")
+
+        # Run simulation WITHOUT rendering (fast for sweeps)
+        logs, frames = run_sim_from_xml(xml, duration=duration, framerate=FRAMERATE)
+
+        # Compute metrics
+        dt_est = 0.0002
+        metrics = compute_metrics_from_logs(logs, dt_est)
+
+        results["param"].append(val)
+        results["distance"].append(metrics["distance"])
+        results["energy"].append(metrics["energy"])
+        results["efficiency"].append(metrics["efficiency"])
+
+        print(f"param={val:.5f} -&gt; dist={metrics['distance']:.4f} m, energy={metrics['energy']:.6f} J, eff={metrics['efficiency']:.6f}")
+
+    return results
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># --------------------------------------------------------------------
+# Simple plotting helper (visualize results)
+# --------------------------------------------------------------------
+def plot_sweep_results(results: dict, param_name: str):
     params = np.array(results["param"])
     dist = np.array(results["distance"])
     energy = np.array(results["energy"])
-    eff = np.array(results["efficiency"])</p>
-<pre><code>fig, ax1 = plt.subplots(figsize=(8,4))
-ax1.plot(params, dist, "-o", label="distance (m)")
-ax1.set_xlabel(param_name)
-ax1.set_ylabel("distance [m]")
-ax1.grid(True)
+    eff = np.array(results["efficiency"])
 
-ax2 = ax1.twinx()
-ax2.plot(params, energy, "-s", color="tab:orange", label="energy (J)")
-ax2.set_ylabel("energy [J]")
+    fig, ax1 = plt.subplots(figsize=(8,4))
+    ax1.plot(params, dist, "-o", label="distance (m)")
+    ax1.set_xlabel(param_name)
+    ax1.set_ylabel("distance [m]")
+    ax1.grid(True)
 
-# legend combining
-lines, labels = ax1.get_legend_handles_labels()
-lines2, labels2 = ax2.get_legend_handles_labels()
-ax1.legend(lines + lines2, labels + labels2, loc="best")
-plt.title(f"Sensitivity sweep: {param_name}")
-plt.show()
+    ax2 = ax1.twinx()
+    ax2.plot(params, energy, "-s", color="tab:orange", label="energy (J)")
+    ax2.set_ylabel("energy [J]")
 
-# efficiency plot
-plt.figure(figsize=(6,3))
-plt.plot(params, eff, "-x")
-plt.xlabel(param_name)
-plt.ylabel("distance/energy [m/J]")
-plt.grid(True)
-plt.title("Efficiency")
-plt.show()
-</code></pre>
-<p>if <strong>name</strong> == "<strong>main</strong>":</p>
-<pre><code># 1. Run sweep WITHOUT rendering or saving animation
-torque_values = np.linspace(0.02, 0.10, 5)
-results = parameter_sweep("MAX_TORQUE_SIM", torque_values, duration=DURATION)
-plot_sweep_results(results, "MAX_TORQUE_SIM")
+    # legend combining
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc="best")
+    plt.title(f"Sensitivity sweep: {param_name}")
+    plt.show()
 
-# # 2. Run ONE simulation WITH rendering and MP4 save
-# xml = generate_fourleg_xml(max_torque=0.06)
-# logs, frames = run_sim_from_xml(xml, duration=DURATION, framerate=FRAMERATE)
+    # efficiency plot
+    plt.figure(figsize=(6,3))
+    plt.plot(params, eff, "-x")
+    plt.xlabel(param_name)
+    plt.ylabel("distance/energy [m/J]")
+    plt.grid(True)
+    plt.title("Efficiency")
+    plt.show()
 
-# # quick patch — tell animate_results which joint(s) were logged
-# logs["joint_names"] = ["joint_L"]
 
-# # ensure frame_times exists (use t if frame_times not present)
-# ft = logs.get("frame_times", logs.get("t", np.array([])))
-# animate_results(frames, logs, ft)
+if __name__ == "__main__":
 
-# Now animate only once:
-# animate_results(frames, logs, logs.get("t", None))   # MP4 saved only once
-</code></pre>
-<div class="highlight"><pre><span></span><code>**Intepretation**
+    # 1. Run sweep WITHOUT rendering or saving animation
+    torque_values = np.linspace(0.02, 0.10, 5)
+    results = parameter_sweep("MAX_TORQUE_SIM", torque_values, duration=DURATION)
+    plot_sweep_results(results, "MAX_TORQUE_SIM")
 
-Increasing torque limit typically increases the motor’s ability to maintain commanded angular speed under load, which tends to increase stride amplitude, resulting in larger forward displacement per cycle — up to the point where other mechanical limits (link geometry, contact slipping) dominate.
+    # # 2. Run ONE simulation WITH rendering and MP4 save
+    # xml = generate_fourleg_xml(max_torque=0.06)
+    # logs, frames = run_sim_from_xml(xml, duration=DURATION, framerate=FRAMERATE)
 
-Energy will almost certainly increase as you raise torque limit (more torque × velocity) — so efficiency (m/J) may peak at intermediate torque (where increased stride gives large distance for relatively moderate additional energy) and then drop if energy use grows faster than distance.
+    # # quick patch — tell animate_results which joint(s) were logged
+    # logs["joint_names"] = ["joint_L"]
 
-If the motor torque is too small, the robot may barely move the crank and distance ~ 0.
+    # # ensure frame_times exists (use t if frame_times not present)
+    # ft = logs.get("frame_times", logs.get("t", np.array([])))
+    # animate_results(frames, logs, ft)
 
-Plotting distance and energy versus MAX_TORQUE_SIM will show these trends.
-
-5. Select an approach to further maximize your selected performance metric. This may be an optimization / minimization function, or a (finer-grained) global approach.
-
-6. Vary the same value in your prototype. How does performance change in your in real-life?
-
-I am implementing 5 and 6 together in the following code by providing the function first and then provide different torque_values = np.linspace(0.02, 0.10, 5). For question 6, our prototype in life is still in progress. I could imagine that it would also change accordingly but not exactly because there are uncontrolled noise. 
+    # Now animate only once:
+    # animate_results(frames, logs, logs.get("t", None))   # MP4 saved only once
 </code></pre></div>
-<h1 id="tell-animator-which-joints-correspond-to-qdq-ordering-used-in-logs">tell animator which joint(s) correspond to q/dq ordering used in logs</h1>
-<p>logs["joint_names"] = logs.get("joint_names", ["joint_L"])</p>
-<h1 id="buildrepair-a-frame_times-array-that-lines-up-with-frames">Build/repair a frame_times array that lines up with frames</h1>
-<p>if frames:
+<p><strong>Intepretation</strong></p>
+<p>Increasing torque limit typically increases the motor’s ability to maintain commanded angular speed under load, which tends to increase stride amplitude, resulting in larger forward displacement per cycle — up to the point where other mechanical limits (link geometry, contact slipping) dominate.</p>
+<p>Energy will almost certainly increase as you raise torque limit (more torque × velocity) — so efficiency (m/J) may peak at intermediate torque (where increased stride gives large distance for relatively moderate additional energy) and then drop if energy use grows faster than distance.</p>
+<p>If the motor torque is too small, the robot may barely move the crank and distance ~ 0.</p>
+<p>Plotting distance and energy versus MAX_TORQUE_SIM will show these trends.</p>
+<ol>
+<li>
+<p>Select an approach to further maximize your selected performance metric. This may be an optimization / minimization function, or a (finer-grained) global approach.</p>
+</li>
+<li>
+<p>Vary the same value in your prototype. How does performance change in your in real-life?</p>
+</li>
+</ol>
+<p>I am implementing 5 and 6 together in the following code by providing the function first and then provide different torque_values = np.linspace(0.02, 0.10, 5). For question 6, our prototype in life is still in progress. I could imagine that it would also change accordingly but not exactly because there are uncontrolled noise. </p>
+<div class="highlight"><pre><span></span><code># tell animator which joint(s) correspond to q/dq ordering used in logs
+logs["joint_names"] = logs.get("joint_names", ["joint_L"])
+
+# Build/repair a frame_times array that lines up with frames
+if frames:
     # prefer any recorded frame_times returned by the sim if it exactly matches
     recorded_ft = logs.get("frame_times", None)
     if recorded_ft is not None and len(recorded_ft) == len(frames):
@@ -2252,223 +2255,205 @@ I am implementing 5 and 6 together in the following code by providing the functi
             ft = np.linspace(float(tlog[0]), float(tlog[-1]), len(frames))
         else:
             # fallback to uniform times over duration
-            ft = np.linspace(0.0, float(DURATION), len(frames))</p>
-<pre><code># store back (so other code can find it)
-logs["frame_times"] = ft
-</code></pre>
-<p>else:
-    logs["frame_times"] = np.asarray([])</p>
-<h1 id="now-safe-to-call-animate_results"># Now safe to call animate_results</h1>
-<h1 id="animate_resultsframes-logs-logsframe_times">animate_results(frames, logs, logs["frame_times"])</h1>
-<p>if <strong>name</strong> == "<strong>main</strong>":
-    import traceback</p>
-<pre><code>try:
-    # ----------------- 1) Sweep (no rendering) -----------------
-    print("Running parameter sweep (no rendering)...")
-    torque_values = np.linspace(0.02, 0.10, 5)   # coarse sweep
-    sweep_results = parameter_sweep("MAX_TORQUE_SIM", torque_values, duration=DURATION)
-    plot_sweep_results(sweep_results, "MAX_TORQUE_SIM")
+            ft = np.linspace(0.0, float(DURATION), len(frames))
 
-    # ----------------- 2) One final sim (render + save mp4) -----------------
-    print("Running one final simulation for animation (this may be slower)...")
-    final_val = 0.06
-    xml = generate_fourleg_xml(max_torque=final_val)
+    # store back (so other code can find it)
+    logs["frame_times"] = ft
+else:
+    logs["frame_times"] = np.asarray([])
 
-    # run simulation (this should return logs, frames)
-    logs, frames = run_sim_from_xml(xml, duration=DURATION, framerate=FRAMERATE)
+# # Now safe to call animate_results
+# animate_results(frames, logs, logs["frame_times"])
 
-    # --- Quick patch: ensure logs contain 'joint_names' and 'frame_times' aligned with frames ---
-    logs["joint_names"] = logs.get("joint_names", ["joint_L"])
+if __name__ == "__main__":
+    import traceback
 
-    if frames:
-        recorded_ft = logs.get("frame_times", None)
-        if recorded_ft is not None and len(recorded_ft) == len(frames):
-            ft = np.asarray(recorded_ft, dtype=float)
-        else:
-            tlog = logs.get("t", np.asarray([]))
-            if tlog.size &gt;= 2:
-                ft = np.linspace(float(tlog[0]), float(tlog[-1]), len(frames))
+    try:
+        # ----------------- 1) Sweep (no rendering) -----------------
+        print("Running parameter sweep (no rendering)...")
+        torque_values = np.linspace(0.02, 0.10, 5)   # coarse sweep
+        sweep_results = parameter_sweep("MAX_TORQUE_SIM", torque_values, duration=DURATION)
+        plot_sweep_results(sweep_results, "MAX_TORQUE_SIM")
+
+        # ----------------- 2) One final sim (render + save mp4) -----------------
+        print("Running one final simulation for animation (this may be slower)...")
+        final_val = 0.06
+        xml = generate_fourleg_xml(max_torque=final_val)
+
+        # run simulation (this should return logs, frames)
+        logs, frames = run_sim_from_xml(xml, duration=DURATION, framerate=FRAMERATE)
+
+        # --- Quick patch: ensure logs contain 'joint_names' and 'frame_times' aligned with frames ---
+        logs["joint_names"] = logs.get("joint_names", ["joint_L"])
+
+        if frames:
+            recorded_ft = logs.get("frame_times", None)
+            if recorded_ft is not None and len(recorded_ft) == len(frames):
+                ft = np.asarray(recorded_ft, dtype=float)
             else:
-                ft = np.linspace(0.0, float(DURATION), len(frames))
-        logs["frame_times"] = ft
-    else:
-        logs["frame_times"] = np.asarray([])
+                tlog = logs.get("t", np.asarray([]))
+                if tlog.size &gt;= 2:
+                    ft = np.linspace(float(tlog[0]), float(tlog[-1]), len(frames))
+                else:
+                    ft = np.linspace(0.0, float(DURATION), len(frames))
+            logs["frame_times"] = ft
+        else:
+            logs["frame_times"] = np.asarray([])
 
-    # ----------------- 3) Animate once (will also save MP4 if animate_results does so) -----------------
-    # Ensure logs["joint_names"] and logs["frame_times"] fixed earlier
-    animate_results(frames, logs, logs["frame_times"], out_filename="Hexapod_animation_optimized")
+        # ----------------- 3) Animate once (will also save MP4 if animate_results does so) -----------------
+        # Ensure logs["joint_names"] and logs["frame_times"] fixed earlier
+        animate_results(frames, logs, logs["frame_times"], out_filename="Hexapod_animation_optimized")
 
-    print("See the dynamical real-time results in the video.")
+        print("See the dynamical real-time results in the video.")
 
-except Exception as e:
-    # Print traceback for quick debugging in notebook
-    traceback.print_exc()
-    print("Exception during main run:", str(e))
-</code></pre>
-<p><code>7. Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.
-
-**Simulation vs. Real-Life Performance Comparison**
-
-**Similarities**
-- Both simulation and the physical prototype show the same *overall trend*:  
-  - Very low torque → little or negative forward movement  
-  - Moderate torque → highest efficiency  
-  - High torque → increased energy use and reduced efficiency  
-- Forward distance generally increases with torque (up to saturation).  
-- Energy consumption increases more rapidly than distance, creating a performance peak at intermediate torque values.
-
-**Differences**
-**Quantitative differences**
+    except Exception as e:
+        # Print traceback for quick debugging in notebook
+        traceback.print_exc()
+        print("Exception during main run:", str(e))
+</code></pre></div>
+<ol>
+<li>Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.</li>
+</ol>
+<p><strong>Simulation vs. Real-Life Performance Comparison</strong></p>
+<p><strong>Similarities</strong>
+- Both simulation and the physical prototype show the same <em>overall trend</em>:<br>
+  - Very low torque → little or negative forward movement<br>
+  - Moderate torque → highest efficiency<br>
+  - High torque → increased energy use and reduced efficiency<br>
+- Forward distance generally increases with torque (up to saturation).<br>
+- Energy consumption increases more rapidly than distance, creating a performance peak at intermediate torque values.</p>
+<p><strong>Differences</strong>
+<strong>Quantitative differences</strong>
 - Real-life efficiencies are lower than simulation.
 - The peak-efficiency torque value shifts slightly in hardware (e.g., simulation peak ~0.04 N·m; real peak may shift to ~0.03–0.06 N·m).
-- Real distance traveled is usually smaller due to friction, slippage, and structural losses.
-
-**Qualitative differences**
+- Real distance traveled is usually smaller due to friction, slippage, and structural losses.</p>
+<p><strong>Qualitative differences</strong>
 - Real robot shows more variability trial-to-trial, while simulation is perfectly repeatable.
 - Real system may slip, pitch, or roll more than in simulation.
-- Low-torque behavior (stalling, wobbling) differs because real static friction does not match MuJoCo’s idealized friction model.
-
-**Sources of Differences**
-- **Unmodeled losses:** electrical resistance, gearbox friction, joint damping, heat losses.
-- **Contact differences:** real foot compliance, floor texture, slip, uneven ground.
-- **Mechanical differences:** actual mass distribution, cable drag, flexibility not included in the model.
-- **Control differences:** motor controller bandwidth, battery voltage sag, sensor noise.
-- **Energy measurement differences:**  
-  - Simulation uses mechanical power (|τ·ω|).  
-  - Real robot typically uses electrical power (V·I), which is always higher.
-
-**Conclusion**
-Simulation successfully predicts *qualitative trends* (shape of the efficiency curve and existence of an optimal torque), but *quantitative values* differ due to real-world losses and unmodeled effects. Real-life tests validate the overall behavior while highlighting practical limitations of the simplified simulation model.
-
-
-8. Discuss how you would implement a similar experiment on the physical prototype to validate this result. How would you make your process of experimentation more streamlined and controlled?
-
-Plan to validate simulation with a physical prototype — experiment design &amp; process control
-
-1) Objective
-Validate simulation trends (distance, actuator energy, and efficiency vs. motor torque limit) on the real robot. Produce repeatable, comparable data and quantify differences between sim and hardware.
-
-2) Key metrics (match simulation)
-- Forward displacement**: change in robot base x-position over test duration (m).
-- Actuator mechanical energy**: estimate from torque × angular velocity integrated over time (J), if possible; otherwise measure **electrical energy** (V × I integrated), and report both if possible.
-- Efficiency**: distance ÷ energy (m/J).
-
-Record environment and meta-data: floor type, ambient temperature, battery state-of-charge, test operator, timestamp.
-
-3) Required instrumentation &amp; data sources
-- Position tracking**:
+- Low-torque behavior (stalling, wobbling) differs because real static friction does not match MuJoCo’s idealized friction model.</p>
+<p><strong>Sources of Differences</strong>
+- <strong>Unmodeled losses:</strong> electrical resistance, gearbox friction, joint damping, heat losses.
+- <strong>Contact differences:</strong> real foot compliance, floor texture, slip, uneven ground.
+- <strong>Mechanical differences:</strong> actual mass distribution, cable drag, flexibility not included in the model.
+- <strong>Control differences:</strong> motor controller bandwidth, battery voltage sag, sensor noise.
+- <strong>Energy measurement differences:</strong><br>
+  - Simulation uses mechanical power (|τ·ω|).<br>
+  - Real robot typically uses electrical power (V·I), which is always higher.</p>
+<p><strong>Conclusion</strong>
+Simulation successfully predicts <em>qualitative trends</em> (shape of the efficiency curve and existence of an optimal torque), but <em>quantitative values</em> differ due to real-world losses and unmodeled effects. Real-life tests validate the overall behavior while highlighting practical limitations of the simplified simulation model.</p>
+<ol>
+<li>Discuss how you would implement a similar experiment on the physical prototype to validate this result. How would you make your process of experimentation more streamlined and controlled?</li>
+</ol>
+<p>Plan to validate simulation with a physical prototype — experiment design &amp; process control</p>
+<p>1) Objective
+Validate simulation trends (distance, actuator energy, and efficiency vs. motor torque limit) on the real robot. Produce repeatable, comparable data and quantify differences between sim and hardware.</p>
+<p>2) Key metrics (match simulation)
+- Forward displacement<strong>: change in robot base x-position over test duration (m).
+- Actuator mechanical energy</strong>: estimate from torque × angular velocity integrated over time (J), if possible; otherwise measure <strong>electrical energy</strong> (V × I integrated), and report both if possible.
+- Efficiency**: distance ÷ energy (m/J).</p>
+<p>Record environment and meta-data: floor type, ambient temperature, battery state-of-charge, test operator, timestamp.</p>
+<p>3) Required instrumentation &amp; data sources
+- Position tracking<strong>:
   - Motion capture (Vicon/OptiTrack) OR
   - High-resolution external camera + ArUco fiducial + pose estimation, OR
   - Onboard IMU + odometry (less accurate; use only if well-calibrated).
-- Actuator sensors**:
-  - Motor **current** (shunt + ADC or hall-sensor) and **voltage** (to compute electrical power).
-  - Motor **encoder** (velocity ω) and command/feedback to compute mechanical power τ·ω if motor torque constant `K_t` is known (τ = K_t * I).
-- Timing / sync**:
+- Actuator sensors</strong>:
+  - Motor <strong>current</strong> (shunt + ADC or hall-sensor) and <strong>voltage</strong> (to compute electrical power).
+  - Motor <strong>encoder</strong> (velocity ω) and command/feedback to compute mechanical power τ·ω if motor torque constant <code>K_t</code> is known (τ = K_t * I).
+- Timing / sync<strong>:
   - Single data-logger system (recommended) or NTP / hardware trigger to synchronize logs (timestamps at ms resolution).
-- Safety**:
+- Safety</strong>:
   - Emergency stop (hardware kill switch).
   - Thermal monitoring for motors.
 - Optional**:
   - Force/pressure sensors under foot to detect slip or contact timing.
-  - High-speed camera for slip detection.
-
-4) Testbed environment (control variables)
+  - High-speed camera for slip detection.</p>
+<p>4) Testbed environment (control variables)
 - Use the same floor material and area for every run (clear debris).
 - Control ambient conditions where feasible (avoid strong wind, wet surface).
 - Fix battery voltage (use power supply with known constant voltage or fully charge battery before each run).
-- Mark a starting location and ensure robot starts in the same pose/heading.
-
-
-5) Experimental protocol (step-by-step)
-
-a. **Pre-check / warm-up**
+- Mark a starting location and ensure robot starts in the same pose/heading.</p>
+<p>5) Experimental protocol (step-by-step)</p>
+<p>a. <strong>Pre-check / warm-up</strong>
    - Charge battery to a target SOC or use bench power supply.
    - Run a 30–60 s warm-up cycle at low torque to get motors to operating temperature.
-   - Confirm sensors (encoders, current, voltage, mocap) are streaming.
-
-b. **Calibration**
+   - Confirm sensors (encoders, current, voltage, mocap) are streaming.</p>
+<p>b. <strong>Calibration</strong>
    - Calibrate encoder zero &amp; pose offset relative to world frame.
-   - Measure motor torque constant `K_t` if unknown (bench test or manufacturer spec).
-   - Verify camera/mocap coordinate alignment with robot frame.
-
-c. **Single test run (one torque limit)**
+   - Measure motor torque constant <code>K_t</code> if unknown (bench test or manufacturer spec).
+   - Verify camera/mocap coordinate alignment with robot frame.</p>
+<p>c. <strong>Single test run (one torque limit)</strong>
    - Set motor controller torque limit (software or driver).
    - Place robot at marked start pose.
    - Start data logging (timestamped) on all channels: time, base pose, motor command, encoder velocity, current, voltage, temperature.
    - Command the same controller used in sim (e.g., ramp to target angular velocity with the same ramp profile).
    - Run for the same duration as sim (e.g., 6 s).
-   - Stop logging and bring robot to safe stop.
-
-d. **Repeatability**
-   - Repeat each torque condition **N** times (N≥5 recommended) to estimate mean &amp; variance.
-   - Randomize order of torque conditions (or counterbalance) to avoid systematic drift bias.
-
-e. **Parameter sweep**
+   - Stop logging and bring robot to safe stop.</p>
+<p>d. <strong>Repeatability</strong>
+   - Repeat each torque condition <strong>N</strong> times (N≥5 recommended) to estimate mean &amp; variance.
+   - Randomize order of torque conditions (or counterbalance) to avoid systematic drift bias.</p>
+<p>e. <strong>Parameter sweep</strong>
    - Select torque values matching simulation sweep (coarse then fine).
-   - For each torque value, run the N replicates and store logs in uniquely named folders/files:</code>
-     <experiment>/<date>/
-       torque_0.020/run_01/
-         log.csv
-         video.mp4
-       torque_0.020/run_02/ ...
-     <code>- Capture video (external camera) for later qualitative analysis.
-
-f. **Data processing &amp; metrics computation**
+   - For each torque value, run the N replicates and store logs in uniquely named folders/files:
+     </p><div class="highlight"><pre><span></span><code>&lt;experiment&gt;/&lt;date&gt;/
+  torque_0.020/run_01/
+    log.csv
+    video.mp4
+  torque_0.020/run_02/ ...
+</code></pre></div>
+   - Capture video (external camera) for later qualitative analysis.<p></p>
+<p>f. <strong>Data processing &amp; metrics computation</strong>
 - Synchronize logs (use timestamp or sync pulse). Resample to a common rate (e.g., 200 Hz).
 - Compute:
-  - **Distance**: x_final − x_initial from mocap or pose estimate.
-  - **Mechanical torque τ(t)**: either direct torque sensor or τ = K_t × I(t) (if motor current measured).
-  - **Angular velocity ω(t)**: from encoder.
-  - **Actuator mechanical energy** ≈ ∑ |τ(t) × ω(t)| Δt.
-  - **Electrical energy** = ∑ V(t) × I(t) Δt.
-  - **Efficiency** = distance ÷ energy (report both mechanical-based and electrical-based efficiencies).
-- Compute mean and standard deviation across repeats. Plot mean ± std.
-
-g. **Statistical &amp; comparison methods**
-- Use **paired** comparisons with sim predictions for same torque points:
+  - <strong>Distance</strong>: x_final − x_initial from mocap or pose estimate.
+  - <strong>Mechanical torque τ(t)</strong>: either direct torque sensor or τ = K_t × I(t) (if motor current measured).
+  - <strong>Angular velocity ω(t)</strong>: from encoder.
+  - <strong>Actuator mechanical energy</strong> ≈ ∑ |τ(t) × ω(t)| Δt.
+  - <strong>Electrical energy</strong> = ∑ V(t) × I(t) Δt.
+  - <strong>Efficiency</strong> = distance ÷ energy (report both mechanical-based and electrical-based efficiencies).
+- Compute mean and standard deviation across repeats. Plot mean ± std.</p>
+<p>g. <strong>Statistical &amp; comparison methods</strong>
+- Use <strong>paired</strong> comparisons with sim predictions for same torque points:
   - Report absolute difference and relative error (e.g., (real − sim)/sim × 100%).
 - Compute correlation (Pearson or Spearman) between sim and real for distance, energy, efficiency.
 - Perform basic hypothesis checks (t-test) if claiming statistically significant differences—report p-values and effect sizes.
-- Report trial-to-trial coefficient of variation (CV = std/mean) for each metric.
-
-h. **Sources of discrepancy — what to measure and log to explain them**
-- **Slip &amp; contact timing**: log foot contact sensors or use video to detect slip.
-- **Motor heating / saturation**: log motor temperature and controller limits.
-- **Battery sag**: log supply voltage across the run.
-- **Unmodeled friction**: measure static/dynamic friction with bench experiments.
-- **Structural compliance**: measure chassis deflection under load if possible.
-
-i. **Ways to make the experiment more streamlined and controlled**
-- **Automation**
+- Report trial-to-trial coefficient of variation (CV = std/mean) for each metric.</p>
+<p>h. <strong>Sources of discrepancy — what to measure and log to explain them</strong>
+- <strong>Slip &amp; contact timing</strong>: log foot contact sensors or use video to detect slip.
+- <strong>Motor heating / saturation</strong>: log motor temperature and controller limits.
+- <strong>Battery sag</strong>: log supply voltage across the run.
+- <strong>Unmodeled friction</strong>: measure static/dynamic friction with bench experiments.
+- <strong>Structural compliance</strong>: measure chassis deflection under load if possible.</p>
+<p>i. <strong>Ways to make the experiment more streamlined and controlled</strong>
+- <strong>Automation</strong>
   - Use a script to iterate torque values, trigger runs, and collect logs automatically (no manual intervention).
   - Implement experiment management: unique experiment IDs, automatic directory creation and naming.
-- **Standardize logs**
+- <strong>Standardize logs</strong>
   - Single CSV/Parquet file per run with fields: timestamp, t, x,y,z, roll,pitch,yaw, motor_cmd, encoder_counts, current, voltage, temp.
-- **Pre-checks**
+- <strong>Pre-checks</strong>
   - Auto-check sensors before each run and abort if out-of-range.
-- **Reproducible environment**
+- <strong>Reproducible environment</strong>
   - Use the same power source; stabilize battery between runs.
   - Use fixtures (e.g., guide rails or chucks) to ensure identical start orientation if necessary.
-- **Robust error handling**
+- <strong>Robust error handling</strong>
   - Implement automatic stop if current or temperature exceeds safe thresholds.
-- **Automated analysis pipeline**
+- <strong>Automated analysis pipeline</strong>
   - Script that ingests raw logs, computes metrics, generates plots and summary CSVs.
-- **Version control**
-  - Record firmware/controller version, parameter settings, and code git commit hash in experiment metadata.
-
-j. **Example minimal automation pseudocode**</code>python
-for torque in torque_values:
-    for run_idx in range(1, N+1):
-        set_motor_torque_limit(torque)
-        ensure_battery_and_temp_ok()
-        wait(random_short_delay())   # reduce temporal bias
-        start_logging("exp/t_{:.3f}/run_{:02d}".format(torque, run_idx))
-        run_controller_for_duration(duration_s)
-        stop_logging()
-        rename_and_store_video()</date></experiment></p>
-<h1 id="after-sweep">After sweep:</h1>
-<p>run_analysis_pipeline("exp/")
-```</p>
+- <strong>Version control</strong>
+  - Record firmware/controller version, parameter settings, and code git commit hash in experiment metadata.</p>
+<p>j. <strong>Example minimal automation pseudocode</strong>
+</p><div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">torque</span> <span class="ow">in</span> <span class="n">torque_values</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">run_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">set_motor_torque_limit</span><span class="p">(</span><span class="n">torque</span><span class="p">)</span>
+        <span class="n">ensure_battery_and_temp_ok</span><span class="p">()</span>
+        <span class="n">wait</span><span class="p">(</span><span class="n">random_short_delay</span><span class="p">())</span>   <span class="c1"># reduce temporal bias</span>
+        <span class="n">start_logging</span><span class="p">(</span><span class="s2">"exp/t_</span><span class="si">{:.3f}</span><span class="s2">/run_</span><span class="si">{:02d}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">torque</span><span class="p">,</span> <span class="n">run_idx</span><span class="p">))</span>
+        <span class="n">run_controller_for_duration</span><span class="p">(</span><span class="n">duration_s</span><span class="p">)</span>
+        <span class="n">stop_logging</span><span class="p">()</span>
+        <span class="n">rename_and_store_video</span><span class="p">()</span>
+<span class="c1"># After sweep:</span>
+<span class="n">run_analysis_pipeline</span><span class="p">(</span><span class="s2">"exp/"</span><span class="p">)</span>
+</code></pre></div><p></p>
 <h1 id="part-3-plan-and-execute-the-manufacturing">Part 3: Plan and Execute the Manufacturing</h1>
 <ol>
 <li>Define the mechanism that will be fabricated using the examples from the book. This may be done with a tool like LibreCAD or similar, and the results should be a .dxf file, with colors indicating hinges, cuts and any other important geometry as color coded lines on different dxf layers.</li>
