@@ -68,7 +68,7 @@ C2_2D = np.array([2.1, 4.053394])
 E2_2D = np.array([2.65, 2.026697])
 F2_2D = np.array([1.55, 2.026697])
 ```
-
+```
 def inch2m_xz(p_inch: np.ndarray) -> np.ndarray:
     """Convert [x,z]_inch in drawing plane -> [x,z]_meter with ground offset."""
     x_m = p_inch[0] * INCH_TO_M
@@ -145,49 +145,8 @@ OMEGA_DES = RPM_3V / 60.0 * 2.0 * math.pi   # rad/s target speed
 
 # Stronger gain but still not full
 KP_VEL   = 0.7 * (MAX_TORQUE_SIM / OMEGA_DES)
+```
 
-## Demonstrating Robot Kinematics:
-
-<iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/h-qRB8NbPaI"
-    title="Simulating Robot Kinematics"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-</iframe>
-
-
-## Measuring Friction:
-
-<iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/GbdgqD_z7yU"
-    title="Measuring Friction"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-</iframe>
-
-
-## Downloading the .dxf file: 
-
-[Download the layser cutting .dxf file](https://drive.google.com/file/d/1LF2AlNSIYC5J-23TM4jydFAAj1r5O-O3/view?usp=drive_link)
-
-## Downloading the file making process instructions
-
-[Download the file making instructions](Project%20Laser%20Cut.pdf)
-
-## Laser Cut Robot Photos: 
-
-<img src="laser_cut_flat.jpg" width="600">
-<img src="laser_cut_standup.jpg" width="600">
-
-<img src="klann_front.jpg" width="600">
-<img src="klann_back.jpg" width="600">
-<img src="klann_side.jpg" width="600">
 
 ```
 
@@ -1970,7 +1929,6 @@ if __name__ == "__main__":
 #         results2 = parameter_sweep("MAX_TORQUE_SIM", fine, duration=DURATION)
 #         plot_sweep_results(results2, "MAX_TORQUE_SIM")
 
-
 ```
 
 7. Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.
@@ -2139,5 +2097,759 @@ for torque in torque_values:
         rename_and_store_video()
 # After sweep:
 run_analysis_pipeline("exp/")
+```
+
+# Part 3: Plan and Execute the Manufacturing
+
+1. Define the mechanism that will be fabricated using the examples from the book. This may be done with a tool like LibreCAD or similar, and the results should be a .dxf file, with colors indicating hinges, cuts and any other important geometry as color coded lines on different dxf layers.
+
+Consider designing into your robot the ability to vary the same property as you vary in your model, such as the stiffness of one particular element, the length of a particular link
+(or many different connection points), or other properties such as mass/inertia/mounting location, etc.
+
+
+2. Use the this file you created to extract joint lines and compute the multi-layer manufacturing
+process as in chapter 52 of the book. Save the cut files
+
+3. Laser cut the geometry on each layer.
+
+** Laser cutting instructions (markdown)**
+
+**Before cutting:**
+- Confirm material thickness and kerf (our script uses `kerf=0.05` — adjust to actual laser kerf, e.g., 0.2 mm).
+- In CAM/lister (e.g., LightBurn, RDWorks, Lasercut software), map DXF layers to speed/power:
+  - `folds` → low power, high speed (score)
+  - `holes` → medium power
+  - `cut` / `final_cut` → full power (cut through)
+- Suggested test cut settings: try a small test piece and iterate.
+
+**Cut sequence:**
+1. Score hinge lines (if present).
+2. Cut internal features (holes, slots).
+3. Cut outer profile last.
+
+**Laminate & assembly Steps**
+- Insert alignment dowels to the alignment holes generated.  
+- Apply adhesive per your adhesive layer design. Use vacuum press or heavy flat weights.  
+- Cure adhesives as recommended.  
+- Trim flash, remove sacrificial tabs and test-fold along hinges.  
+- Add reinforcement or washers to servo mount locations if using thin material.
+
+4. Laminate the layers together
+5. Fold up your system
+6. Attach servos and test functionality.
+- Fasten servos to `mounts` holes. Use small screws and standoffs.  
+- Mount motor/servo horn to crank/motor block geometry from the DXF.  
+- Test rotation manually to ensure no binding and correct range of motion.
+
+**Step 1 Prepare CAD input (instructions)**
+
+- Create `body.dxf`. Put geometry into named layers:
+  - `body` — main outlines (visual reference)
+  - `cut` — full-cut lines (final perimeter + internal through cuts) — color **red**
+  - `holes` — holes (mounts & alignment) — color **blue**
+  - `joint` — joint/fold axes where hinges attach — color **green**
+  - `folds` — optionally score lines for folding — color **magenta**
+  - `mounts` — servo mounts or brackets — color **yellow**
+
+Save `body.dxf` into the same folder as this notebook / script.
+
+```
+import foldable_robotics.dxf as frd
+import foldable_robotics as fr
+import foldable_robotics.manufacturing as frm
+from foldable_robotics.layer import Layer
+from foldable_robotics.laminate import Laminate
+import foldable_robotics.parts.castellated_hinge2 as frc
+import shapely.geometry as sg
+```
+
+```
+fr.display_height=300
+fr.resolution = 4
+desired_degrees = 120
+thickness = 1
+plain_width = frm.plain_hinge_width(desired_degrees,thickness)
+plain_width
+
+```
+
+```
+support_width = 2 # must be larger than hinge width
+kerf = .05
+is_adhesive = [False,True,False,True,False]
+arc_approx = 10
+NUM_LAYERS = 5
+bridge_thickness = 2
+bounding_box_padding = 10
+jig_spacing = 10
+jig_dia = 5
+
+```
+
+```
+body_vertices = frd.read_lwpolylines('body.dxf',
+layer='body',
+arc_approx = arc_approx)
+body_vertices
+body_polygons = [sg.Polygon(item) for item in body_vertices]
+body_polygons[0]
+body_layer = Layer(*body_polygons)
+body_layer
+```
+
+
+```
+
+cut_vertices = frd.read_lwpolylines('body.dxf', layer='cut', arc_approx=arc_approx)
+
+#print(f"The number of original objects: {len(cut_vertices)}")
+
+# Clean and verify the data
+cleaned_polygons = []
+for i, v in enumerate(cut_vertices):
+    # Remove duplicate adjacent vertices
+    unique_vertices = [v[0]]
+    for point in v[1:]:
+        last_point = unique_vertices[-1]
+        # If the points are not repeated (the distance is greater than 0.001
+        if abs(point[0] - last_point[0]) > 0.001 or abs(point[1] - last_point[1]) > 0.001:
+            unique_vertices.append(point)
+    
+    # Check if there are enough vertices
+    if len(unique_vertices) >= 3:
+        try:
+            poly = sg.Polygon(unique_vertices)
+            if poly.is_valid and poly.area > 0.001:  # Make sure the area is not zero
+                cleaned_polygons.append(poly)
+                print(f"object {i}: {len(unique_vertices)} effect vertex")
+            else:
+                print(f"Object {i}: invalid or the area is 0")
+        except Exception as e:
+            print(f"object {i}: error - {e}")
+    else:
+        print(f"object {i}: vertex not enough ({len(unique_vertices)} < 3)")
+
+print(f"\nThe number of valid objects after cleaning: {len(cleaned_polygons)}")
+
+# Create Layer
+if cleaned_polygons:
+    cut_layer = Layer(*cleaned_polygons)
+    cut_layer.plot()
+else:
+    cut_layer = Layer()
+```
+
+```
+body_layer -= cut_layer
+```
+
+```
+hole_vertices = frd.read_lwpolylines('body.dxf', layer='holes', arc_approx = arc_approx)
+hole_layer = Layer(*[sg.Polygon(item) for item in hole_vertices])
+hole_layer
+```
+
+```
+body_layer -= hole_layer
+body_layer
+```
+
+
+```
+joint_vertices = frd.read_lines('body.dxf', layer='joint')
+# Create a joint line layer
+joint_lines_original_layer = Layer(*[sg.LineString(item) for item in joint_vertices])
+joint_lines_original_layer.plot()
+
+# Take the intersection with body_layer to obtain the trimmed joint line
+joint_lines_modified_layer = joint_lines_original_layer & body_layer
+body_layer.plot()
+joint_lines_modified_layer.plot()
+
+modified_joint_vertices = [list(item.coords) for item in joint_lines_modified_layer.geoms]
+print(f"Find {len(modified_joint_vertices)} joints line")
+```
+
+```
+castellated_width,castellated_gap = \
+frm.castellated_hinge_width(desired_degrees,thickness)
+print(plain_width,castellated_gap,castellated_width)
+```
+
+```
+hinge = frc.generate(castellated_gap,castellated_width)
+hinge.plot()
+```
+
+```
+support_width = 1
+```
+
+```
+lam = Layer().to_laminate(len(hinge))
+all_hinges = []
+for p3,p4 in modified_joint_vertices:
+    all_hinges.append(hinge.map_line_stretch((0,0),(1,0),p3,p4))  # Properly indented this line
+all_hinges = lam.unary_union(*all_hinges)
+all_hinges.plot()
+```
+
+```
+actual_final_device = Laminate(body_layer,body_layer,body_layer,body_layer,body_layer)
+actual_final_device -= all_hinges
+actual_final_device.plot()
+```
+
+```
+hole,dummy = frm.calc_hole(modified_joint_vertices,plain_width/2)
+fr.my_line_width=0
+holes = hole.to_laminate(NUM_LAYERS)
+holes<<=.5 # add a little extra material to ensure we removed enough.
+holes.plot()
+```
+
+```
+# Visualize each layer
+actual_final_device[0].plot()
+actual_final_device[2].plot()
+```
+
+```
+keepout = frm.keepout_laser(actual_final_device)
+keepout.plot()
+```
+
+```
+layer_id = frm.build_layer_numbers(NUM_LAYERS, text_size=jig_dia)
+layer_id = layer_id.simplify(.2)
+layer_id[0].plot()
+```
+
+
+```
+# Calculate alignment holes
+(x1,y1),(x2,y2) = actual_final_device.bounding_box_coords()
+w1,h1 = actual_final_device.get_dimensions()
+w2 = round(w1/jig_spacing)*jig_spacing+jig_spacing+support_width
+h2 = round(h1/jig_spacing)*jig_spacing+jig_spacing+support_width
+x1 -= (w2-w1)/2
+y1 -= (h2-h1)/2
+x2 += (w2-w1)/2
+y2 += (h2-h1)/2
+points = []
+points.append(sg.Point(x1,y1))
+points.append(sg.Point(x2,y1))
+points.append(sg.Point(x1,y2))
+points.append(sg.Point(x2,y2))
+alignment_holes_layer = Layer(*points)
+alignment_holes_layer<<=(jig_dia/2)
+alignment_holes=alignment_holes_layer.to_laminate(NUM_LAYERS)
+alignment_holes.plot()
+```
+
+```
+# Generate material board
+sheet_layer = (alignment_holes_layer<<bounding_box_padding).bounding_box()
+sheet=sheet_layer.to_laminate(NUM_LAYERS)
+sheet.plot()
+```
+
+```
+# Calculate removable waste
+removable_scrap = frm.calculate_removable_scrap(actual_final_device,sheet,support_width,is_adhesive)
+web = removable_scrap-alignment_holes-layer_id.translate(x1+jig_dia,y1-jig_dia/2)
+(web | actual_final_device).plot()
+```
+
+```
+# The second cutting of waste materials
+second_pass_scrap = sheet-keepout
+second_pass_scrap.plot()
+```
+
+```
+first_pass_scrap = sheet - second_pass_scrap - actual_final_device
+first_pass_scrap = frm.cleanup(first_pass_scrap,.00001)
+first_pass_scrap.plot()
+```
+
+
+```
+# Generate the supporting structure
+support = frm.support(
+    actual_final_device,
+    frm.keepout_laser,
+    support_width,
+    support_width/2)
+support.plot()
+```
+
+```
+# support design
+supported_design = web|actual_final_device|support
+supported_design.plot()
+```
+
+```
+# cutting material
+cut_material = (keepout<<kerf)-keepout
+cut_material.plot()
+```
+
+```
+# surplus material
+remaining_material = supported_design-cut_material
+remaining_material.plot()
+```
+
+```
+# Search for the connected part
+remaining_parts = frm.find_connected(remaining_material, is_adhesive)
+for item in remaining_parts:
+    item.plot(new=True)  # This line is now properly indented with 4 spaces
+```
+
+```
+# Assistant
+test_part = actual_final_device >> 1
+for result in remaining_parts:
+    if not (result & test_part).is_null():
+        break
+result.plot()
+```
+
+```
+check = (result^actual_final_device)
+check>>=1e-1
+assert(check.is_null())
+```
+
+
+```
+# Generate the final output file
+w,h = supported_design.get_dimensions()
+p0,p1 = supported_design.bounding_box_coords()
+# rigid layer
+rigid_layer = supported_design[0] | (supported_design[-1].translate(w+5,0))
+rigid_layer.plot()
+```
+
+```
+# adhesive phase
+l4 = supported_design[3].scale(-1,1)
+p2,p3 = l4.bounding_box_coords()
+l4 = l4.translate(p0[0]-p2[0]+w+5,p0[1]-p2[1])
+adhesive_layer = supported_design[1] | l4
+adhesive_layer.plot()
+```
+
+```
+# The first time cutting the file
+first_pass = Laminate(rigid_layer,adhesive_layer,supported_design[2])
+first_pass.export_dxf('first_pass')
+print("Created first_pass.dxf")
+```
+
+
+```
+# Final cut file
+final_cut = sheet - keepout
+final_cut = final_cut[0]
+final_cut.export_dxf('final_cut')
+print("Created final_cut.dxf")
+final_cut.plot()
+```
+
+7. Connect ESP32 and program the gait.
+
+**ESP32 firmware (Arduino-style) — upload to ESP32**
+
+Below is a minimal example to control one servo with `ESP32Servo` or use PWM to command a continuous rotation servo (adapt as needed for your motor type). But we did not implement it on our own robot. To achive the continuous walking behavior, we need a rotating motor/servo. The servo we had switch back and force, so we cannot use it. 
+
+Notes: Do not power servos from ESP32 3.3V. Use a separate 5V supply and common ground.
+
+8. Run the robot and record its behavior (qualitative) and performance(quantitative) as a function of the metric you determined earlier.
+
+A few hours before the submission deadline, we had a working prototype. 
+
+<video width="400" controls>
+  <source src="prototype5b.mp4" type="video/mp4">
+</video>
+
+<!-- <video width="450" controls>
+  <source src="https://drive.google.com/uc?export=download&id=1tH9ywBLHlNfgxw_yHizM8pdhatv__l-a" type="video/mp4">
+</video> -->
+
+
+We ran out of time to collect data from the physical robot. Below is what should have been done. 
+
+**Measurement setup**
+- Overhead camera with fixed mount. Calibrate with a known-length ruler for pixel→meter scaling.  
+- Current sensor (e.g., INA219 or ACS712) inline between battery and servos to log energy.  
+- Log servo commands with timestamps (via Serial or SD).  
+- Use bright marker on robot for automated video tracking (OpenCV).
+
+**Trial protocol**
+- For each parameter value (e.g. hinge_gap), run N≥5 trials.
+- Record: start time, battery voltage, video, current trace, servo commands.
+- Compute: distance (from video), energy (integral of V*I or V * ∑I*dt), efficiency = distance / energy.
+
+**Analysis**
+- Save results as `experiment_results.csv` with columns:
+  - `param_value, trial, distance_m, energy_J, duration_s, notes`
+
+```
+# Video-based displacement measurement (Python + OpenCV snippet)
+# Use this to get displacement from an overhead video using a bright marker.
+# pip install opencv-python-headless numpy pandas
+
+import cv2
+import numpy as np
+
+def marker_displacement(video_path, px_to_m=1.0):
+    cap = cv2.VideoCapture(video_path)
+    positions = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        # convert to HSV and threshold bright red-ish marker (adjust hsv range)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        # example ranges; tune to marker color
+        lower = np.array([0, 50, 50])
+        upper = np.array([10, 255, 255])
+        mask = cv2.inRange(hsv, lower, upper)
+        # find contours
+        cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if cnts:
+            c = max(cnts, key=cv2.contourArea)
+            M = cv2.moments(c)
+            if M["m00"] != 0:
+                cx = M["m10"]/M["m00"]
+                cy = M["m01"]/M["m00"]
+                positions.append((cx, cy))
+    cap.release()
+    if not positions:
+        return 0.0, []
+    xs = [p[0] for p in positions]
+    dx_px = xs[-1] - xs[0]
+    dx_m = dx_px * px_to_m
+    return dx_m, positions
+
+# Example usage:
+# distance, positions = marker_displacement("run1_topdown.mp4", px_to_m=0.001)  # set px_to_m from calibration
+# print("Distance (m):", distance)
+
+```
+
+
+**Automate parameter sweep (coupling DXF generation and MuJoCo sim)**
+
+Below is a Python cell that programmatically:
+- modifies the CAD generation parameters (hinge gap, layer count, or a named variable),
+- exports DXF files for each parameter,
+- runs MuJoCo simulation for the corresponding model parameter (if you have `make_xml_with_param` and `run_sim_from_xml` implemented),
+- collects metrics and saves them.
+
+**WARNING**: Running many MuJoCo simulations can be slow. Run a small sweep first.
+
+```
+# Parameter sweep wrapper
+import numpy as np
+import pandas as pd
+from pathlib import Path
+
+def sweep_hinge_gap(hinge_values_mm, xml_template_str, output_dir="sweep_outputs"):
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    results = []
+    for g in hinge_values_mm:
+        print("=== sweeping hinge_gap =", g, "mm ===")
+        # 1) regenerate CAD / DXF with new hinge gap (you must adapt to your pipeline)
+        # Example: regenerate hinge geometry and export named DXFs
+        castellated_width, castellated_gap = frm.castellated_hinge_width(desired_degrees, thickness)
+        # if castellated_gap depends on g, override it; here we assume g is gap in mm
+        hinge_template = frc.generate(g, castellated_width)   # adapt call signature if needed
+        # map hinge_template to joints, build laminate and export
+        # (reuse the block in cell 3a but parameterize hinge generation)
+        # For brevity assume we built 'first_pass' and 'final_cut' for parameter g
+        fname1 = Path(output_dir) / f"first_pass_gap_{g:.2f}.dxf"
+        fname2 = Path(output_dir) / f"final_cut_gap_{g:.2f}.dxf"
+        # first_pass.export_dxf(str(fname1))
+        # final_cut.export_dxf(str(fname2))
+        print("Exported DXFs:", fname1, fname2)
+
+        # 2) Run MuJoCo sim for corresponding model param (if modeled)
+        # Example: set parameter MAX_TORQUE_SIM or a custom param in the XML:
+        # xml_str = make_xml_with_param(xml_template_str, "MAX_TORQUE_SIM", some_value)
+        # logs, frames = run_sim_from_xml(xml_str)
+        # metrics = compute_metrics_from_logs(logs, dt_est=0.0002)
+        # For demo, we generate dummy metrics:
+        metrics = {"distance": np.random.rand()*0.1, "energy": np.random.rand()*0.5, "efficiency": 0.0}
+        metrics["efficiency"] = metrics["distance"] / metrics["energy"] if metrics["energy"]>1e-9 else 0.0
+
+        results.append({"param": g, **metrics})
+    df = pd.DataFrame(results)
+    df.to_csv(Path(output_dir)/"sweep_results.csv", index=False)
+    print("Saved sweep_results.csv")
+    return df
+
+# Example run (use real XML template and real pipeline)
+# df = sweep_hinge_gap([0.5, 1.0, 1.5, 2.0], DYN_FOURLEG_XML)
+# df.head()
+```
+
+
+
+# Part 4. Experimental Validation and Analysis 
+
+1. Vary the design parameter you selected for study earlier in your optimization. This is your experimental variable. Keep all other variables constant.
+2. Run the robot, and collect data. You may use any sensor at your disposal
+• IMU (available for checkout)
+• Marker / Camera (phone camera w/ tracker program)
+• Any other sensor
+3. Compare the data you collected in real life against the model. How does your robot’s performance change as you vary your variable of interest? Does your model agree?
+4. Show quantitative comparisons in a figure
+
+We do not know how to do Part 4 Experimental Validation and Analysis. The following answer is trying our best in the limited time to come up with something. 
+
+
+
+The greatest challenge is to make the linkage robot flat. We tried many versions of prototypes. 
+
+<img src="prototype1.jpg" alt="Prototype 1" width="400">
+
+<img src="prototype2.jpg" alt="Prototype 2" width="400">
+
+<video width="400" controls>
+  <source src="prototype3.mp4" type="video/mp4">
+</video>
+
+
+
+Finally the robot is walking, we used one AAA battery at first and then it was not enough to move the robot, then we used 3 AAA batteries and it moved. When we put all three AAA batteries directly on the robot, the robot cannot carry the heavy weight to move. Maybe we need stiffer materials to carry a heavy payload. 
+
+<img src="prototype5.png" alt="Prototype 5" width="400">
+
+<img src="prototype5b.png" alt="Prototype 5b" width="400">
+
+<video width="400" controls>
+  <source src="prototype5b.mp4" type="video/mp4">
+</video>
+
+<iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/h-qRB8NbPaI"
+    title="Simulating Robot Kinematics"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+</iframe>
+
+
+
+We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degress, so we decided to continue using the motor. 
+
+<video width="400" controls>
+  <source src="servo.mp4" type="video/mp4">
+</video>
+
+**In an ideal world where the physibal foldable robot runs like our simulation, the procedure should be like the following:** 
+
+**Experimental variable:** motor torque limit (MAX_TORQUE).  
+**Controlled variables:** initial pose, run duration, floor surface, battery state / supply voltage, controller ramp profile.
+
+**Procedure**
+1. For each torque value in the sweep (e.g., 0.02, 0.04, 0.06, 0.08, 0.10 N·m):
+   - Set torque limit on the motor controller.
+   - Place robot in the same start pose and orientation.
+   - Start synchronized logging of: time, base pose (x,y,z), motor current, motor voltage, encoder angular velocity.
+   - Command the same controller used in simulation (same ramp, same duration).
+   - Run for the same duration as simulation (e.g., 6 s).
+   - Repeat each torque condition N times (N ≥ 3) to estimate variance.
+2. Save each run as a CSV file in a folder structured by torque value and run index.
+
+**Metrics (computed per run)**
+- **Distance** = \(x(t_{\text{end}}) - x(t_{\text{start}})\).
+- **Mechanical energy (estimate)** = \(\sum | \tau(t) \cdot \omega(t) | \Delta t\), where \(\tau(t) = K_t \cdot I(t)\) (use measured motor current and the motor torque constant \(K_t\)).
+- **Electrical energy (optional)** = \(\sum V(t)\, I(t)\, \Delta t\).
+- **Efficiency** = distance / energy (m/J).
+
+**Comparison**
+- For each torque value compute mean ± std of distance, energy, and efficiency across repeats.
+- Compare the simulation values (from your parameter sweep) to the real mean ± std.
+- Plot both series on the same axes: distance vs torque, energy vs torque, efficiency vs torque (use twin y-axis or separate subplots).
+
+**Interpretation**
+- Report whether the simulation predicts the same trend (peak efficiency region, monotonic increase of energy, etc.).
+- Quantify differences using absolute/relative error and report possible causes (friction, slip, electrical losses, battery sag, model simplifications).
+
+Contents: 
+- timestamp: UNIX epoch or ISO string (for sync)
+- t: seconds since run start
+- x,y,z: robot base position in world frame (meters)
+- encoder_rad_s: motor angular velocity (rad/s)
+- current_A, voltage_V: electrical signals to compute electrical energy
+- motor_cmd: controller command (torque or percent)
+- temperature_C: optional motor temperature
+- sim_results — dict with arrays from your simulation sweep (param, distance, energy, efficiency) — e.g., the results you computed earlier.
+- Real experiment CSVs organized in data_dir with filenames following the schema above.
+
+Below is the expected code to run on the real robot: 
+
+```
+import os
+import glob
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from typing import List
+
+# ------------------ Helper functions ------------------
+def load_runs_for_torque(data_dir: str, torque_val: float) -> List[pd.DataFrame]:
+    pattern = os.path.join(data_dir, f"exp_torque_{torque_val:.3f}_run_*.csv")
+    files = sorted(glob.glob(pattern))
+    dfs = [pd.read_csv(f) for f in files]
+    return dfs
+
+def compute_metrics_from_run(df: pd.DataFrame, Kt: float, dt_override=None):
+    # df must contain: t, x, encoder_rad_s, current_A, voltage_V
+    t = df['t'].to_numpy()
+    x = df['x'].to_numpy()
+    # distance
+    distance = float(x[-1] - x[0])
+    # dt
+    if dt_override is not None:
+        dt = dt_override
+    else:
+        if len(t) > 1:
+            dt = float(np.mean(np.diff(t)))
+        else:
+            dt = 1e-3
+    # torque and omega
+    I = df['current_A'].to_numpy()
+    omega = df['encoder_rad_s'].to_numpy()
+    tau = Kt * I
+    mech_power = np.abs(tau * omega)
+    mech_energy = float(np.sum(mech_power) * dt)
+    # electrical energy optional
+    if 'voltage_V' in df.columns:
+        elec_power = np.abs(df['voltage_V'].to_numpy() * I)
+        elec_energy = float(np.sum(elec_power) * dt)
+    else:
+        elec_energy = np.nan
+    efficiency = distance / mech_energy if mech_energy > 1e-12 else 0.0
+    return {'distance': distance, 'mech_energy': mech_energy, 'elec_energy': elec_energy, 'efficiency': efficiency}
+
+# ------------------ Aggregate experimental results ------------------
+def aggregate_experiment(data_dir: str, torque_values: List[float], Kt: float):
+    agg = {'param': [], 'distance_mean': [], 'distance_std': [],
+           'mech_energy_mean': [], 'mech_energy_std': [],
+           'eff_mean': [], 'eff_std': []}
+    for val in torque_values:
+        dfs = load_runs_for_torque(data_dir, val)
+        metrics = []
+        for df in dfs:
+            metrics.append(compute_metrics_from_run(df, Kt))
+        if not metrics:
+            # No runs found for this torque
+            agg['param'].append(val)
+            for k in ['distance_mean','distance_std','mech_energy_mean','mech_energy_std','eff_mean','eff_std']:
+                agg[k].append(np.nan)
+            continue
+        distances = np.array([m['distance'] for m in metrics])
+        energies = np.array([m['mech_energy'] for m in metrics])
+        effs = np.array([m['efficiency'] for m in metrics])
+        agg['param'].append(val)
+        agg['distance_mean'].append(distances.mean())
+        agg['distance_std'].append(distances.std(ddof=1) if len(distances)>1 else 0.0)
+        agg['mech_energy_mean'].append(energies.mean())
+        agg['mech_energy_std'].append(energies.std(ddof=1) if len(energies)>1 else 0.0)
+        agg['eff_mean'].append(effs.mean())
+        agg['eff_std'].append(effs.std(ddof=1) if len(effs)>1 else 0.0)
+    return agg
+
+# ------------------ Plotting comparison ------------------
+def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
+    params_sim = np.array(sim_results['param'])
+    dist_sim = np.array(sim_results['distance'])
+    energy_sim = np.array(sim_results['energy'])
+    eff_sim = np.array(sim_results['efficiency'])
+
+    params = np.array(exp_agg['param'])
+    dist_mean = np.array(exp_agg['distance_mean'])
+    dist_std = np.array(exp_agg['distance_std'])
+    energy_mean = np.array(exp_agg['mech_energy_mean'])
+    energy_std = np.array(exp_agg['mech_energy_std'])
+    eff_mean = np.array(exp_agg['eff_mean'])
+    eff_std = np.array(exp_agg['eff_std'])
+
+    fig, axs = plt.subplots(1,3, figsize=(15,4))
+    # distance
+    axs[0].plot(params_sim, dist_sim, '-o', label='sim')
+    axs[0].errorbar(params, dist_mean, yerr=dist_std, fmt='s', label='exp', capsize=3)
+    axs[0].set_xlabel('Torque [N·m]'); axs[0].set_ylabel('Distance [m]'); axs[0].grid(True); axs[0].legend()
+    # energy
+    axs[1].plot(params_sim, energy_sim, '-o', label='sim')
+    axs[1].errorbar(params, energy_mean, yerr=energy_std, fmt='s', label='exp', capsize=3)
+    axs[1].set_xlabel('Torque [N·m]'); axs[1].set_ylabel('Mechanical Energy [J]'); axs[1].grid(True); axs[1].legend()
+    # efficiency
+    axs[2].plot(params_sim, eff_sim, '-o', label='sim')
+    axs[2].errorbar(params, eff_mean, yerr=eff_std, fmt='s', label='exp', capsize=3)
+    axs[2].set_xlabel('Torque [N·m]'); axs[2].set_ylabel('Efficiency [m/J]'); axs[2].grid(True); axs[2].legend()
+
+    fig.tight_layout()
+    plt.show()
+
+# ------------------ Example usage ------------------
+# sim_results variable should come from your earlier simulation sweep
+# data_dir should contain the CSVs for experimental runs
+# torque_values should be the same list used in the sim sweep
+#
+# Kt = motor torque constant [N·m / A]  (set from datasheet or bench test)
+#
+# Example:
+# data_dir = "exp_data"
+# torque_values = [0.02, 0.04, 0.06, 0.08, 0.10]
+# exp_agg = aggregate_experiment(data_dir, torque_values, Kt=0.015)
+# plot_sim_vs_exp(sim_results, exp_agg)
+
+```
+
+
+## Measuring Friction:
+
+<iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/GbdgqD_z7yU"
+    title="Measuring Friction"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+</iframe>
+
+
+
+
+
+
+
+## Downloading the .dxf file: 
+
+[Download the layser cutting .dxf file](https://drive.google.com/file/d/1LF2AlNSIYC5J-23TM4jydFAAj1r5O-O3/view?usp=drive_link)
+
+## Downloading the file making process instructions
+
+[Download the file making instructions](Project%20Laser%20Cut.pdf)
+
+## Laser Cut Robot Photos: 
+
+<img src="laser_cut_flat.jpg" width="600">
+<img src="laser_cut_standup.jpg" width="600">
+
+<img src="klann_front.jpg" width="600">
+<img src="klann_back.jpg" width="600">
+<img src="klann_side.jpg" width="600">
 
 
