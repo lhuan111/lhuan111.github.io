@@ -11,7 +11,7 @@ Produce a final dynamic model in Mujoco that adapts the ideal kinematics of your
 
 The following codes carry out the simulation and plots. 
 
-'''
+```
 from __future__ import annotations
 import math
 from typing import List
@@ -28,11 +28,11 @@ import shutil
 
 import shutil, os # this is to solve the mediapy.show_video failure
 
-'''
+```
 
 The functions of the blocks are described on the first row: 
 
-'''
+```
 
 # ---------------- Global viz params ----------------
 WIDTH, HEIGHT = 1024, 576
@@ -67,7 +67,7 @@ A2_2D = np.array([3.2, 0.0])
 C2_2D = np.array([2.1, 4.053394])
 E2_2D = np.array([2.65, 2.026697])
 F2_2D = np.array([1.55, 2.026697])
-'''
+```
 
 def inch2m_xz(p_inch: np.ndarray) -> np.ndarray:
     """Convert [x,z]_inch in drawing plane -> [x,z]_meter with ground offset."""
@@ -189,7 +189,7 @@ KP_VEL   = 0.7 * (MAX_TORQUE_SIM / OMEGA_DES)
 <img src="klann_back.jpg" width="600">
 <img src="klann_side.jpg" width="600">
 
-'''
+```
 
 # ----------------------------------------------------------------------
 #  Helper: quaternion -> roll, pitch, yaw
@@ -213,9 +213,9 @@ def quat_to_rpy(q: np.ndarray) -> np.ndarray:
     yaw = math.atan2(siny_cosp, cosy_cosp)
     return np.array([roll, pitch, yaw])
 
-'''
+```
 
-'''
+```
 # ======================================================================
 # INSERTED: XML generator for parameter sweeps
 # ======================================================================
@@ -685,7 +685,7 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 
 
 
-'''
+```
 # ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------
 
 DYN_FOURLEG_XML = f"""
@@ -1129,9 +1129,9 @@ DYN_FOURLEG_XML = f"""
 
 </mujoco>
 """
-'''
+```
 
-'''
+```
 # ---------------- Simulation code ----------------
 
 def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
@@ -1280,9 +1280,9 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
 
        
 
-'''
+```
 
-'''
+```
 
 def plot_results(logs):
     t        = logs["t"]
@@ -1347,10 +1347,10 @@ def plot_results(logs):
     fig.tight_layout()
     plt.show()
 
-'''
+```
 
 
-'''
+```
 def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
     t        = logs["t"]
     q        = logs["q"]
@@ -1569,7 +1569,7 @@ if __name__ == "__main__":
     # else:
     #     plot_results(logs)
 
-'''
+```
 
 
 # Part 2: Optimize your design
@@ -1596,7 +1596,7 @@ Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, 
 
 Below is the code for the sweep and the results.
 
-'''
+```
 # Add these imports at top if not already present
 import math
 import numpy as np
@@ -1858,7 +1858,7 @@ if __name__ == "__main__":
     # Now animate only once:
     # animate_results(frames, logs, logs.get("t", None))   # MP4 saved only once
 
-'''
+```
 
 **Intepretation**
 
@@ -1876,7 +1876,7 @@ Plotting distance and energy versus MAX_TORQUE_SIM will show these trends.
 
 I am implementing 5 and 6 together in the following code by providing the function first and then provide different torque_values = np.linspace(0.02, 0.10, 5). For question 6, our prototype in life is still in progress. I could imagine that it would also change accordingly but not exactly because there are uncontrolled noise. 
 
-'''
+```
 # tell animator which joint(s) correspond to q/dq ordering used in logs
 logs["joint_names"] = logs.get("joint_names", ["joint_L"])
 
@@ -1971,7 +1971,7 @@ if __name__ == "__main__":
 #         plot_sweep_results(results2, "MAX_TORQUE_SIM")
 
 
-'''
+```
 
 7. Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.
 
