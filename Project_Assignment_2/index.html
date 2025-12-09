@@ -635,14 +635,7 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
     mt = float(MAX_TORQUE_SIM if max_torque is None else max_torque)
     fr = float(FOOT_RADIUS if foot_radius is None else foot_radius)
 
-    # --- Paste the ENTIRE content of your original DYN_FOURLEG_XML here ---
-# ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------
-
-    # Replace only:
-    #  - the MB_L_bar fromto with {-MB_scaled[0]:.5f} 0 {-MB_scaled[1]:.5f}
-    #  - the MB_R_bar fromto with {MB_scaled[0]:.5f} 0 {MB_scaled[1]:.5f}
-    #  - each foot geom size with {fr:.4f}
-    #  - the actuator ctrlrange upper bound with {mt:.5f}
+# ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ---------------- 
     xml = f"""
 &lt;mujoco model="fourbar_fourlegs"&gt;
   &lt;option timestep="0.0002" gravity="0 0 -9.81"&gt;
@@ -1087,16 +1080,14 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
     return xml
 ···
 </code></pre></div>
-<h1 id="-mujoco-xml-4-legs-6-feet-1-motor-">---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------</h1>
-<p></p><div class="highlight"><pre><span></span><code>
-</code></pre></div>
-DYN_FOURLEG_XML = f"""
+<h1 id="mujoco-xml-4-legs-6-feet-1-motor">MuJoCo XML: 4 legs, 6 feet, 1 motor</h1>
+<p>DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
 <br>
 <option timestep="0.0002" gravity="0 0 -9.81">
     <flag contact="enable">
   </flag></option>
-<p></p>
+</mujoco></p>
 <p><visual>
     <global offwidth="{WIDTH}" offheight="{HEIGHT}">
   </global></visual></p>
@@ -3074,7 +3065,7 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="laser_cut_standup.jpg" data-desc-position="bottom"><img src="laser_cut_standup.jpg" width="600"></a></p>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_front.jpg" data-desc-position="bottom"><img src="klann_front.jpg" width="600"></a>
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_back.jpg" data-desc-position="bottom"><img src="klann_back.jpg" width="600"></a>
-<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p></mujoco>
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p>
 
 
 
