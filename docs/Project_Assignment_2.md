@@ -638,8 +638,9 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 
 
 
+MuJoCo XML: 4 legs, 6 feet, 1 motor
+
 ```
-#MuJoCo XML: 4 legs, 6 feet, 1 motor
 DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
   <option timestep="0.0002" gravity="0 0 -9.81">
