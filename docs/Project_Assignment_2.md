@@ -15,6 +15,10 @@
     allowfullscreen>
 </iframe>
 
+The first video is our Mujoco simulation. 
+
+
+
 <iframe width="560" height="315"
     src="https://www.youtube.com/embed/k89TbkdRb_I"
     title="Dynamical Data"
@@ -23,6 +27,7 @@
     allowfullscreen>
 </iframe>
 
+The second video is our Mujoco-generated real-time data while the robot walks. 
 
 <iframe width="560" height="315"
     src="https://www.youtube.com/embed/GtDq5xMh6zY"
@@ -32,6 +37,7 @@
     allowfullscreen>
 </iframe>
 
+The third video is our physical robot. 
 
 
 ## Part 1: Define the System Model
@@ -1317,7 +1323,6 @@ def plot_results(logs):
 
 
 ```
-```
 def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
     t        = logs["t"]
     q        = logs["q"]
@@ -1538,6 +1543,7 @@ if __name__ == "__main__":
 ```
 
 <img src="Data_output.jpg" alt="Data Output" width="600">
+Figure 1. Data output shows the static version of sweep results
 
 <iframe width="560" height="315"
     src="https://www.youtube.com/embed/k89TbkdRb_I"
@@ -1547,8 +1553,12 @@ if __name__ == "__main__":
     allowfullscreen>
 </iframe>
 
+This video shows the real-time dynamical data collection in Mujoco. 
 
-```
+
+
+
+
 ## Part 2: Optimize your design
 
 Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
@@ -1564,8 +1574,8 @@ We pick motor torque limit (MAX_TORQUE_SIM) as the example design parameter (it'
 We compute two metrics per simulation run:
 
 - Forward Distance (m) — base_x_final - base_x_initial (use base world x position from data.qpos or data.site_xpos if you prefer a specific site).
+  
 - Energy used (J) — numerical integral over simulation of actuator power: sum(|tau * joint_vel| * dt) where tau is data.qfrc_actuator for the motor and joint_vel is the motor joint velocity. We use absolute work approximated by |torque * angular_velocity| * dt. Optionally divide distance by energy for efficiency (m/J).
-
 
 Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, F1_L_site, D1_L_site, and possibly the chassis motor_block geom). To measure chassis base world position, we'll use the free body joint chassis_free qpos (first three elements of data.qpos at the base qpos address), which you already logged in base_xyz_log. That avoids any extra <sensor> syntax and is reliable.
 
@@ -1574,7 +1584,7 @@ Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, 
 Below is the code for the sweep and the results.
 
 ```
-# Add these imports at top if not already present
+#Add these imports at top if not already present
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1745,6 +1755,7 @@ def compute_metrics_from_logs(logs: dict, dt_est: float) -> dict:
     efficiency = distance / energy if energy > 1e-12 else 0.0
 
     return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": dt}
+
 
 # --------------------------------------------------------------------
 # Sweep a parameter (e.g. MAX_TORQUE_SIM) across values and collect metrics
@@ -2832,7 +2843,6 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 # plot_sim_vs_exp(sim_results, exp_agg)
 
 ```
-
 
 
 ## Downloading the .dxf file: 
