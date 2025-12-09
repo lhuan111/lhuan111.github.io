@@ -641,7 +641,7 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 </mujoco>
 """
     return xml
-
+···
 
 
 ```
@@ -1090,6 +1090,7 @@ DYN_FOURLEG_XML = f"""
 """
 ```
 
+
 ```
 # ---------------- Simulation code ----------------
 
@@ -1237,12 +1238,9 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
 
     return frames, model, data, logs, frame_times
 
-       
-
 ```
 
 ```
-
 def plot_results(logs):
     t        = logs["t"]
     q        = logs["q"]
@@ -1531,7 +1529,7 @@ if __name__ == "__main__":
 ```
 
 
-# Part 2: Optimize your design
+## Part 2: Optimize your design
 
 Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
 
@@ -1758,8 +1756,9 @@ def parameter_sweep(param_name: str, param_values: List[float], duration: float 
         print(f"param={val:.5f} -> dist={metrics['distance']:.4f} m, energy={metrics['energy']:.6f} J, eff={metrics['efficiency']:.6f}")
 
     return results
+```
 
-
+```
 # --------------------------------------------------------------------
 # Simple plotting helper (visualize results)
 # --------------------------------------------------------------------
@@ -1907,28 +1906,6 @@ if __name__ == "__main__":
         # Print traceback for quick debugging in notebook
         traceback.print_exc()
         print("Exception during main run:", str(e))
-
-
-# if __name__ == "__main__":
-#     try:
-#         # 1) coarse sweep
-#         coarse = np.linspace(0.02, 0.10, 9)
-#         results1 = parameter_sweep("MAX_TORQUE_SIM", coarse, duration=DURATION)
-#         plot_sweep_results(results1, "MAX_TORQUE_SIM")
-
-#         # find best coarse torque
-#         best_idx = np.argmax(results1["efficiency"])
-#         best_torque = results1["param"][best_idx]
-#         print("Best coarse torque =", best_torque)
-
-#         # 2) fine sweep around best region
-#         low = max(0.02, best_torque - 0.01)
-#         high = min(0.10, best_torque + 0.01)
-#         fine = np.linspace(low, high, 20)
-
-#         results2 = parameter_sweep("MAX_TORQUE_SIM", fine, duration=DURATION)
-#         plot_sweep_results(results2, "MAX_TORQUE_SIM")
-
 ```
 
 7. Discuss any similarities or differences, qualitatively and quantitatively. Attribute differences to any modeled or unmodeled differences between simulation and real-life.
@@ -2170,7 +2147,6 @@ desired_degrees = 120
 thickness = 1
 plain_width = frm.plain_hinge_width(desired_degrees,thickness)
 plain_width
-
 ```
 
 ```
@@ -2183,7 +2159,6 @@ bridge_thickness = 2
 bounding_box_padding = 10
 jig_spacing = 10
 jig_dia = 5
-
 ```
 
 ```
@@ -2199,7 +2174,6 @@ body_layer
 
 
 ```
-
 cut_vertices = frd.read_lwpolylines('body.dxf', layer='cut', arc_approx=arc_approx)
 
 #print(f"The number of original objects: {len(cut_vertices)}")
@@ -2625,8 +2599,7 @@ The greatest challenge is to make the linkage robot flat. We tried many versions
 </video>
 
 
-
-Finally the robot is walking, we used one AAA battery at first and then it was not enough to move the robot, then we used 3 AAA batteries and it moved. When we put all three AAA batteries directly on the robot, the robot cannot carry the heavy weight to move. Maybe we need stiffer materials to carry a heavy payload. 
+Finally, the robot is walking, we used one AAA battery at first and then it was not enough to move the robot, then we used 3 AAA batteries and it moved. When we put all three AAA batteries directly on the robot, the robot cannot carry the heavy weight to move. Maybe we need stiffer materials to carry a heavy payload. 
 
 <img src="prototype5.png" alt="Prototype 5" width="400">
 
@@ -2704,7 +2677,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List
+```
 
+
+```
 # ------------------ Helper functions ------------------
 def load_runs_for_torque(data_dir: str, torque_val: float) -> List[pd.DataFrame]:
     pattern = os.path.join(data_dir, f"exp_torque_{torque_val:.3f}_run_*.csv")
@@ -2740,7 +2716,9 @@ def compute_metrics_from_run(df: pd.DataFrame, Kt: float, dt_override=None):
         elec_energy = np.nan
     efficiency = distance / mech_energy if mech_energy > 1e-12 else 0.0
     return {'distance': distance, 'mech_energy': mech_energy, 'elec_energy': elec_energy, 'efficiency': efficiency}
+```
 
+```
 # ------------------ Aggregate experimental results ------------------
 def aggregate_experiment(data_dir: str, torque_values: List[float], Kt: float):
     agg = {'param': [], 'distance_mean': [], 'distance_std': [],
