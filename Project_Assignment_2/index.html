@@ -619,7 +619,7 @@ def quat_to_rpy(q: np.ndarray) -&gt; np.ndarray:
     yaw = math.atan2(siny_cosp, cosy_cosp)
     return np.array([roll, pitch, yaw])
 </code></pre></div>
-<p></p><div class="highlight"><pre><span></span><code># ======================================================================
+<div class="highlight"><pre><span></span><code># ======================================================================
 # INSERTED: XML generator for parameter sweeps
 # ======================================================================
 
@@ -1083,441 +1083,449 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 
 
 MuJoCo XML: 4 legs, 6 feet, 1 motor
-</code></pre></div>
+
 DYN_FOURLEG_XML = f"""
-<mujoco model="fourbar_fourlegs">
-<br>
-<option timestep="0.0002" gravity="0 0 -9.81">
-    <flag contact="enable">
-  </flag></option>
-<p></p>
-<p><visual>
-    <global offwidth="{WIDTH}" offheight="{HEIGHT}">
-  </global></visual></p>
-<p><worldbody></worldbody></p>
-<pre><code>&lt;!-- ground --&gt;
-&lt;geom name="floor" type="plane" pos="0 0 0"
-      size="2 2 0.02"
-      friction="0.5 0.005 0.0005"
-      contype="1" conaffinity="0"
-      rgba="0.4 0.4 0.4 1"/&gt;
+&lt;mujoco model="fourbar_fourlegs"&gt;
+  &lt;option timestep="0.0002" gravity="0 0 -9.81"&gt;
+    &lt;flag contact="enable"/&gt;
+  &lt;/option&gt;
 
-&lt;!-- light and camera --&gt;
-&lt;light name="top" pos="0 0 1" dir="0 0 -1"
-       diffuse="1 1 1" specular="0.2 0.2 0.2"/&gt;
+  &lt;visual&gt;
+    &lt;global offwidth="{WIDTH}" offheight="{HEIGHT}"/&gt;
+  &lt;/visual&gt;
 
-&lt;camera name="cam" mode="fixed"
-        pos="0 -0.5 0.10"
-        axisangle="1 0 0 90"/&gt;
+  &lt;worldbody&gt;
 
-&lt;!-- CHASSIS at M, centered between left/right legs (y=0) --&gt;
-&lt;body name="chassis" pos="{M[0]:.5f} 0 {M[1]:.5f}"&gt;
-  &lt;joint name="chassis_free" type="free"/&gt;
+      &lt;!-- ground --&gt;
+    &lt;geom name="floor" type="plane" pos="0 0 0"
+          size="2 2 0.02"
+          friction="0.5 0.005 0.0005"
+          contype="1" conaffinity="0"
+          rgba="0.4 0.4 0.4 1"/&gt;
 
-  &lt;!-- base + motor block (smaller) --&gt;
-  &lt;geom name="chassis_base" type="box" size="0.007 0.007 0.0045"
-        mass="{MASS_BASE:.4f}" rgba="0.6 0.6 0.6 1"/&gt;
-  &lt;geom name="motor_block" type="box" size="0.009 0.006 0.015"
-        mass="{MASS_MOTOR:.4f}" pos="0 0 0.03"
-        rgba="1 1 0.3 1"/&gt;
+    &lt;!-- light and camera --&gt;
+    &lt;light name="top" pos="0 0 1" dir="0 0 -1"
+           diffuse="1 1 1" specular="0.2 0.2 0.2"/&gt;
 
-  &lt;!-- ========== D anchors (fixed on chassis) ========== --&gt;
+    &lt;camera name="cam" mode="fixed"
+            pos="0 -0.5 0.10"
+            axisangle="1 0 0 90"/&gt;
 
-  &lt;!-- Left-back D1_L --&gt;
-  &lt;body name="D1_L_body" pos="{D1_rel[0]:.5f} {-Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
-    &lt;geom name="D1_L_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.3 0.8 0.1 1"/&gt;
-    &lt;site name="D1_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+    &lt;!-- CHASSIS at M, centered between left/right legs (y=0) --&gt;
+    &lt;body name="chassis" pos="{M[0]:.5f} 0 {M[1]:.5f}"&gt;
+      &lt;joint name="chassis_free" type="free"/&gt;
 
-    &lt;body name="DE1_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE1_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE1_L_bar" type="capsule"
-            fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE1_L_end_site"
-            pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+      &lt;!-- base + motor block (smaller) --&gt;
+      &lt;geom name="chassis_base" type="box" size="0.007 0.007 0.0045"
+            mass="{MASS_BASE:.4f}" rgba="0.6 0.6 0.6 1"/&gt;
+      &lt;geom name="motor_block" type="box" size="0.009 0.006 0.015"
+            mass="{MASS_MOTOR:.4f}" pos="0 0 0.03"
+            rgba="1 1 0.3 1"/&gt;
 
-    &lt;body name="DF1_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF1_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF1_L_bar" type="capsule"
-            fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF1_L_end_site"
-            pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+      &lt;!-- ========== D anchors (fixed on chassis) ========== --&gt;
 
-  &lt;!-- Left-front D2_L --&gt;
-  &lt;body name="D2_L_body" pos="{D2_rel[0]:.5f} {-Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
-    &lt;geom name="D2_L_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.3 0.8 0.6 1"/&gt;
-    &lt;site name="D2_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+      &lt;!-- Left-back D1_L --&gt;
+      &lt;body name="D1_L_body" pos="{D1_rel[0]:.5f} {-Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
+        &lt;geom name="D1_L_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.3 0.8 0.1 1"/&gt;
+        &lt;site name="D1_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-    &lt;body name="DE2_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE2_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE2_L_bar" type="capsule"
-            fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE2_L_end_site"
-            pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+        &lt;body name="DE1_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE1_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE1_L_bar" type="capsule"
+                fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE1_L_end_site"
+                pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-    &lt;body name="DF2_L_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF2_L" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF2_L_bar" type="capsule"
-            fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF2_L_end_site"
-            pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+        &lt;body name="DF1_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF1_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF1_L_bar" type="capsule"
+                fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF1_L_end_site"
+                pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-  &lt;!-- Right-back D1_R --&gt;
-  &lt;body name="D1_R_body" pos="{D1_rel[0]:.5f} {Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
-    &lt;geom name="D1_R_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.1 0.6 0.9 1"/&gt;
-    &lt;site name="D1_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+      &lt;!-- Left-front D2_L --&gt;
+      &lt;body name="D2_L_body" pos="{D2_rel[0]:.5f} {-Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
+        &lt;geom name="D2_L_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.3 0.8 0.6 1"/&gt;
+        &lt;site name="D2_L_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-    &lt;body name="DE1_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE1_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE1_R_bar" type="capsule"
-            fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE1_R_end_site"
-            pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+        &lt;body name="DE2_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE2_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE2_L_bar" type="capsule"
+                fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE2_L_end_site"
+                pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-    &lt;body name="DF1_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF1_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF1_R_bar" type="capsule"
-            fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF1_R_end_site"
-            pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+        &lt;body name="DF2_L_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF2_L" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF2_L_bar" type="capsule"
+                fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF2_L_end_site"
+                pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-  &lt;!-- Right-front D2_R --&gt;
-  &lt;body name="D2_R_body" pos="{D2_rel[0]:.5f} {Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
-    &lt;geom name="D2_R_marker" type="sphere" size="0.0018"
-          density="1000" rgba="0.3 0.6 0.9 1"/&gt;
-    &lt;site name="D2_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
+      &lt;!-- Right-back D1_R --&gt;
+      &lt;body name="D1_R_body" pos="{D1_rel[0]:.5f} {Y_OFF:.5f} {D1_rel[2]:.5f}"&gt;
+        &lt;geom name="D1_R_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.1 0.6 0.9 1"/&gt;
+        &lt;site name="D1_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-    &lt;body name="DE2_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DE2_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DE2_R_bar" type="capsule"
-            fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DE2_R_end_site"
-            pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
+        &lt;body name="DE1_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE1_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE1_R_bar" type="capsule"
+                fromto="0 0 0   {DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE1_R_end_site"
+                pos="{DE1_vec[0]:.5f} 0 {DE1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-    &lt;body name="DF2_R_body" pos="0 0 0"&gt;
-      &lt;joint name="joint_DF2_R" type="hinge"
-             axis="0 1 0" damping="0.001"/&gt;
-      &lt;geom name="DF2_R_bar" type="capsule"
-            fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0022"
-            contype="0" conaffinity="0"
-            rgba="0.0 0.7 0.0 1"/&gt;
-      &lt;site name="DF2_R_end_site"
-            pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
-            size="0.001" rgba="0 0 0 0"/&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
+        &lt;body name="DF1_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF1_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF1_R_bar" type="capsule"
+                fromto="0 0 0   {DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF1_R_end_site"
+                pos="{DF1_vec[0]:.5f} 0 {DF1_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-  &lt;!-- ========== SINGLE crank root (ONE motor driving both MBs) ========== --&gt;
-  &lt;body name="crank_root" pos="{M_rel[0]:.5f} 0 {M_rel[2]:.5f}"&gt;
-    &lt;!-- single joint, single motor --&gt;
-    &lt;joint name="joint_L" type="hinge"
-           axis="0 1 0" range="-720 720" damping="0.01"/&gt;
+      &lt;!-- Right-front D2_R --&gt;
+      &lt;body name="D2_R_body" pos="{D2_rel[0]:.5f} {Y_OFF:.5f} {D2_rel[2]:.5f}"&gt;
+        &lt;geom name="D2_R_marker" type="sphere" size="0.0018"
+              density="1000" rgba="0.3 0.6 0.9 1"/&gt;
+        &lt;site name="D2_R_site" pos="0 0 0" size="0.001" rgba="0 0 0 0"/&gt;
 
-    &lt;!-- ===== LEFT side: B_L ===== --&gt;
-    &lt;body name="B_L_body" pos="{B_rel[0]:.5f} {-Y_OFF:.5f} {B_rel[2]:.5f}"&gt;
-      &lt;!-- rod from B_L back to M --&gt;
-      &lt;geom name="MB_L_bar" type="capsule"
-            fromto="0 0 0   {-MB_vec[0]:.5f} 0 {-MB_vec[1]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0028"
-            rgba="0.1 0.1 0.1 1"/&gt;
+        &lt;body name="DE2_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DE2_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DE2_R_bar" type="capsule"
+                fromto="0 0 0   {DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DE2_R_end_site"
+                pos="{DE2_vec[0]:.5f} 0 {DE2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
 
-      &lt;geom name="B_L_foot" type="sphere"
-            pos="0 0 0"
-            size="{FOOT_RADIUS:.4f}"
-            density="{DENS_FOOT:.1f}"
-            friction="0.5 0.005 0.0005"
-            contype="0" conaffinity="1"
-            rgba="0.8 0.2 0.2 1"/&gt;
+        &lt;body name="DF2_R_body" pos="0 0 0"&gt;
+          &lt;joint name="joint_DF2_R" type="hinge"
+                 axis="0 1 0" damping="0.001"/&gt;
+          &lt;geom name="DF2_R_bar" type="capsule"
+                fromto="0 0 0   {DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0022"
+                contype="0" conaffinity="0"
+                rgba="0.0 0.7 0.0 1"/&gt;
+          &lt;site name="DF2_R_end_site"
+                pos="{DF2_vec[0]:.5f} 0 {DF2_vec[2]:.5f}"
+                size="0.001" rgba="0 0 0 0"/&gt;
+        &lt;/body&gt;
+      &lt;/body&gt;
 
-      &lt;!-- back left leg --&gt;
-      &lt;body name="BC1_L_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC1_L" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
+      &lt;!-- ========== SINGLE crank root (ONE motor driving both MBs) ========== --&gt;
+      &lt;body name="crank_root" pos="{M_rel[0]:.5f} 0 {M_rel[2]:.5f}"&gt;
+        &lt;!-- single joint, single motor --&gt;
+        &lt;joint name="joint_L" type="hinge"
+               axis="0 1 0" range="-720 720" damping="0.01"/&gt;
 
-        &lt;geom name="BC1_L_bar" type="capsule"
-              fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
+        &lt;!-- ===== LEFT side: B_L ===== --&gt;
+        &lt;body name="B_L_body" pos="{B_rel[0]:.5f} {-Y_OFF:.5f} {B_rel[2]:.5f}"&gt;
+          &lt;!-- rod from B_L back to M --&gt;
+          &lt;geom name="MB_L_bar" type="capsule"
+                fromto="0 0 0   {-MB_vec[0]:.5f} 0 {-MB_vec[1]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0028"
+                rgba="0.1 0.1 0.1 1"/&gt;
 
-        &lt;site name="F1_L_site"
-              pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
+          &lt;geom name="B_L_foot" type="sphere"
+                pos="0 0 0"
+                size="{FOOT_RADIUS:.4f}"
+                density="{DENS_FOOT:.1f}"
+                friction="0.5 0.005 0.0005"
+                contype="0" conaffinity="1"
+                rgba="0.8 0.2 0.2 1"/&gt;
 
-        &lt;body name="C1_L_body"
-              pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C1_L_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
-
-          &lt;body name="AC1_L_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA1_L" type="hinge"
+          &lt;!-- back left leg --&gt;
+          &lt;body name="BC1_L_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC1_L" type="hinge"
                    axis="0 1 0" damping="0.001"/&gt;
 
-            &lt;geom name="AC1_L_bar" type="capsule"
-                  fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
+            &lt;geom name="BC1_L_bar" type="capsule"
+                  fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
                   density="{DENS_LEG:.1f}" size="0.0028"
                   rgba="0.15 0.15 0.15 1"/&gt;
 
-            &lt;site name="E1_L_site"
-                  pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
+            &lt;site name="F1_L_site"
+                  pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
                   size="0.001" rgba="0 0 0 0"/&gt;
 
-            &lt;body name="A1_L_body"
-                  pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A1_L_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.8 0.2 0.2 1"/&gt;
+            &lt;body name="C1_L_body"
+                  pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C1_L_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC1_L_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA1_L" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC1_L_bar" type="capsule"
+                      fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E1_L_site"
+                      pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A1_L_body"
+                      pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A1_L_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.8 0.2 0.2 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
+            &lt;/body&gt;
+          &lt;/body&gt;
+
+          &lt;!-- front left leg --&gt;
+          &lt;body name="BC2_L_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC2_L" type="hinge"
+                   axis="0 1 0" damping="0.001"/&gt;
+
+            &lt;geom name="BC2_L_bar" type="capsule"
+                  fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
+                  density="{DENS_LEG:.1f}" size="0.0028"
+                  rgba="0.15 0.15 0.15 1"/&gt;
+
+            &lt;site name="F2_L_site"
+                  pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
+                  size="0.001" rgba="0 0 0 0"/&gt;
+
+            &lt;body name="C2_L_body"
+                  pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C2_L_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC2_L_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA2_L" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC2_L_bar" type="capsule"
+                      fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E2_L_site"
+                      pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A2_L_body"
+                      pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A2_L_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.8 0.2 0.2 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
+            &lt;/body&gt;
+          &lt;/body&gt;
+        &lt;/body&gt;
+
+        &lt;!-- ===== RIGHT side: B_R, 180° around shaft ===== --&gt;
+        &lt;body name="B_R_body"
+              pos="{-B_rel[0]:.5f} {Y_OFF:.5f} {-B_rel[2]:.5f}"&gt;
+          &lt;!-- rod from B_R back to M (opposite direction) --&gt;
+          &lt;geom name="MB_R_bar" type="capsule"
+                fromto="0 0 0   {MB_vec[0]:.5f} 0 {MB_vec[1]:.5f}"
+                density="{DENS_LEG:.1f}" size="0.0028"
+                rgba="0.1 0.1 0.1 1"/&gt;
+
+          &lt;geom name="B_R_foot" type="sphere"
+                pos="0 0 0"
+                size="{FOOT_RADIUS:.4f}"
+                density="{DENS_FOOT:.1f}"
+                friction="0.5 0.005 0.0005"
+                contype="0" conaffinity="1"
+                rgba="0.2 0.8 0.4 1"/&gt;
+
+          &lt;!-- back right leg --&gt;
+          &lt;body name="BC1_R_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC1_R" type="hinge"
+                   axis="0 1 0" damping="0.001"/&gt;
+
+            &lt;geom name="BC1_R_bar" type="capsule"
+                  fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
+                  density="{DENS_LEG:.1f}" size="0.0028"
+                  rgba="0.15 0.15 0.15 1"/&gt;
+
+            &lt;site name="F1_R_site"
+                  pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
+                  size="0.001" rgba="0 0 0 0"/&gt;
+
+            &lt;body name="C1_R_body"
+                  pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C1_R_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC1_R_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA1_R" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC1_R_bar" type="capsule"
+                      fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E1_R_site"
+                      pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A1_R_body"
+                      pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A1_R_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.2 0.8 0.4 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
+            &lt;/body&gt;
+          &lt;/body&gt;
+
+          &lt;!-- front right leg --&gt;
+          &lt;body name="BC2_R_body" pos="0 0 0"&gt;
+            &lt;joint name="joint_BC2_R" type="hinge"
+                   axis="0 1 0" damping="0.001"/&gt;
+
+            &lt;geom name="BC2_R_bar" type="capsule"
+                  fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
+                  density="{DENS_LEG:.1f}" size="0.0028"
+                  rgba="0.15 0.15 0.15 1"/&gt;
+
+            &lt;site name="F2_R_site"
+                  pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
+                  size="0.001" rgba="0 0 0 0"/&gt;
+
+            &lt;body name="C2_R_body"
+                  pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
+              &lt;geom name="C2_R_marker" type="sphere" size="0.0018"
+                    density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+
+              &lt;body name="AC2_R_body" pos="0 0 0"&gt;
+                &lt;joint name="joint_CA2_R" type="hinge"
+                       axis="0 1 0" damping="0.001"/&gt;
+
+                &lt;geom name="AC2_R_bar" type="capsule"
+                      fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
+                      density="{DENS_LEG:.1f}" size="0.0028"
+                      rgba="0.15 0.15 0.15 1"/&gt;
+
+                &lt;site name="E2_R_site"
+                      pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
+                      size="0.001" rgba="0 0 0 0"/&gt;
+
+                &lt;body name="A2_R_body"
+                      pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
+                  &lt;geom name="A2_R_foot" type="sphere"
+                        size="{FOOT_RADIUS:.4f}"
+                        density="{DENS_FOOT:.1f}"
+                        friction="0.5 0.005 0.0005"
+                        contype="0" conaffinity="1"
+                        rgba="0.2 0.8 0.4 1"/&gt;
+                &lt;/body&gt;
+              &lt;/body&gt;
             &lt;/body&gt;
           &lt;/body&gt;
         &lt;/body&gt;
       &lt;/body&gt;
 
-      &lt;!-- front left leg --&gt;
-      &lt;body name="BC2_L_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC2_L" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
+    &lt;/body&gt; &lt;!-- end chassis --&gt;
 
-        &lt;geom name="BC2_L_bar" type="capsule"
-              fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
+  &lt;/worldbody&gt;
 
-        &lt;site name="F2_L_site"
-              pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
+  &lt;!-- 4-bar equality constraints (DE/DF only) --&gt;
+  &lt;equality&gt;
+    &lt;!-- Left-back leg --&gt;
+    &lt;connect name="DE1_L_eq"
+             site1="DE1_L_end_site" site2="E1_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF1_L_eq"
+             site1="DF1_L_end_site" site2="F1_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
 
-        &lt;body name="C2_L_body"
-              pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C2_L_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
+    &lt;!-- Left-front leg --&gt;
+    &lt;connect name="DE2_L_eq"
+             site1="DE2_L_end_site" site2="E2_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF2_L_eq"
+             site1="DF2_L_end_site" site2="F2_L_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
 
-          &lt;body name="AC2_L_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA2_L" type="hinge"
-                   axis="0 1 0" damping="0.001"/&gt;
+    &lt;!-- Right-back leg --&gt;
+    &lt;connect name="DE1_R_eq"
+             site1="DE1_R_end_site" site2="E1_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF1_R_eq"
+             site1="DF1_R_end_site" site2="F1_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
 
-            &lt;geom name="AC2_L_bar" type="capsule"
-                  fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
-                  density="{DENS_LEG:.1f}" size="0.0028"
-                  rgba="0.15 0.15 0.15 1"/&gt;
+    &lt;!-- Right-front leg --&gt;
+    &lt;connect name="DE2_R_eq"
+             site1="DE2_R_end_site" site2="E2_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+    &lt;connect name="DF2_R_eq"
+             site1="DF2_R_end_site" site2="F2_R_site"
+             solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
+  &lt;/equality&gt;
 
-            &lt;site name="E2_L_site"
-                  pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
-                  size="0.001" rgba="0 0 0 0"/&gt;
+  &lt;actuator&gt;
+    &lt;!-- one motor, one joint, positive torque only --&gt;
+    &lt;motor name="hip_motor" joint="joint_L"
+           gear="1.0" ctrlrange="0 {MAX_TORQUE_SIM:.5f}"/&gt;
+  &lt;/actuator&gt;
 
-            &lt;body name="A2_L_body"
-                  pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A2_L_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.8 0.2 0.2 1"/&gt;
-            &lt;/body&gt;
-          &lt;/body&gt;
-        &lt;/body&gt;
-      &lt;/body&gt;
-    &lt;/body&gt;
-
-    &lt;!-- ===== RIGHT side: B_R, 180° around shaft ===== --&gt;
-    &lt;body name="B_R_body"
-          pos="{-B_rel[0]:.5f} {Y_OFF:.5f} {-B_rel[2]:.5f}"&gt;
-      &lt;!-- rod from B_R back to M (opposite direction) --&gt;
-      &lt;geom name="MB_R_bar" type="capsule"
-            fromto="0 0 0   {MB_vec[0]:.5f} 0 {MB_vec[1]:.5f}"
-            density="{DENS_LEG:.1f}" size="0.0028"
-            rgba="0.1 0.1 0.1 1"/&gt;
-
-      &lt;geom name="B_R_foot" type="sphere"
-            pos="0 0 0"
-            size="{FOOT_RADIUS:.4f}"
-            density="{DENS_FOOT:.1f}"
-            friction="0.5 0.005 0.0005"
-            contype="0" conaffinity="1"
-            rgba="0.2 0.8 0.4 1"/&gt;
-
-      &lt;!-- back right leg --&gt;
-      &lt;body name="BC1_R_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC1_R" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
-
-        &lt;geom name="BC1_R_bar" type="capsule"
-              fromto="0 0 0   {C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
-
-        &lt;site name="F1_R_site"
-              pos="{F1_rel_from_B_3d[0]:.5f} 0 {F1_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
-
-        &lt;body name="C1_R_body"
-              pos="{C1_rel_from_B[0]:.5f} 0 {C1_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C1_R_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
-
-          &lt;body name="AC1_R_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA1_R" type="hinge"
-                   axis="0 1 0" damping="0.001"/&gt;
-
-            &lt;geom name="AC1_R_bar" type="capsule"
-                  fromto="0 0 0   {A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"
-                  density="{DENS_LEG:.1f}" size="0.0028"
-                  rgba="0.15 0.15 0.15 1"/&gt;
-
-            &lt;site name="E1_R_site"
-                  pos="{E1_rel_from_C_3d[0]:.5f} 0 {E1_rel_from_C_3d[2]:.5f}"
-                  size="0.001" rgba="0 0 0 0"/&gt;
-
-            &lt;body name="A1_R_body"
-                  pos="{A1_rel_from_C[0]:.5f} 0 {A1_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A1_R_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.2 0.8 0.4 1"/&gt;
-            &lt;/body&gt;
-          &lt;/body&gt;
-        &lt;/body&gt;
-      &lt;/body&gt;
-
-      &lt;!-- front right leg --&gt;
-      &lt;body name="BC2_R_body" pos="0 0 0"&gt;
-        &lt;joint name="joint_BC2_R" type="hinge"
-               axis="0 1 0" damping="0.001"/&gt;
-
-        &lt;geom name="BC2_R_bar" type="capsule"
-              fromto="0 0 0   {C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"
-              density="{DENS_LEG:.1f}" size="0.0028"
-              rgba="0.15 0.15 0.15 1"/&gt;
-
-        &lt;site name="F2_R_site"
-              pos="{F2_rel_from_B_3d[0]:.5f} 0 {F2_rel_from_B_3d[2]:.5f}"
-              size="0.001" rgba="0 0 0 0"/&gt;
-
-        &lt;body name="C2_R_body"
-              pos="{C2_rel_from_B[0]:.5f} 0 {C2_rel_from_B[2]:.5f}"&gt;
-          &lt;geom name="C2_R_marker" type="sphere" size="0.0018"
-                density="1000" rgba="0.1 0.3 0.9 1"/&gt;
-
-          &lt;body name="AC2_R_body" pos="0 0 0"&gt;
-            &lt;joint name="joint_CA2_R" type="hinge"
-                   axis="0 1 0" damping="0.001"/&gt;
-
-            &lt;geom name="AC2_R_bar" type="capsule"
-                  fromto="0 0 0   {A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"
-                  density="{DENS_LEG:.1f}" size="0.0028"
-                  rgba="0.15 0.15 0.15 1"/&gt;
-
-            &lt;site name="E2_R_site"
-                  pos="{E2_rel_from_C_3d[0]:.5f} 0 {E2_rel_from_C_3d[2]:.5f}"
-                  size="0.001" rgba="0 0 0 0"/&gt;
-
-            &lt;body name="A2_R_body"
-                  pos="{A2_rel_from_C[0]:.5f} 0 {A2_rel_from_C[2]:.5f}"&gt;
-              &lt;geom name="A2_R_foot" type="sphere"
-                    size="{FOOT_RADIUS:.4f}"
-                    density="{DENS_FOOT:.1f}"
-                    friction="0.5 0.005 0.0005"
-                    contype="0" conaffinity="1"
-                    rgba="0.2 0.8 0.4 1"/&gt;
-            &lt;/body&gt;
-          &lt;/body&gt;
-        &lt;/body&gt;
-      &lt;/body&gt;
-    &lt;/body&gt;
-  &lt;/body&gt;
-
-&lt;/body&gt; &lt;!-- end chassis --&gt;
-</code></pre>
-<p></p>
-<!-- 4-bar equality constraints (DE/DF only) -->
-<p><equality>
-    <!-- Left-back leg -->
-    <connect name="DE1_L_eq" site1="DE1_L_end_site" site2="E1_L_site" solref="0.005 1" solimp="0.8 0.95 0.001">
-    <connect name="DF1_L_eq" site1="DF1_L_end_site" site2="F1_L_site" solref="0.005 1" solimp="0.8 0.95 0.001"></connect></connect></equality></p>
-<pre><code>&lt;!-- Left-front leg --&gt;
-&lt;connect name="DE2_L_eq"
-         site1="DE2_L_end_site" site2="E2_L_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-&lt;connect name="DF2_L_eq"
-         site1="DF2_L_end_site" site2="F2_L_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-
-&lt;!-- Right-back leg --&gt;
-&lt;connect name="DE1_R_eq"
-         site1="DE1_R_end_site" site2="E1_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-&lt;connect name="DF1_R_eq"
-         site1="DF1_R_end_site" site2="F1_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-
-&lt;!-- Right-front leg --&gt;
-&lt;connect name="DE2_R_eq"
-         site1="DE2_R_end_site" site2="E2_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-&lt;connect name="DF2_R_eq"
-         site1="DF2_R_end_site" site2="F2_R_site"
-         solref="0.005 1" solimp="0.8 0.95 0.001"/&gt;
-</code></pre>
-<p></p>
-<p><actuator>
-    <!-- one motor, one joint, positive torque only -->
-    <motor name="hip_motor" joint="joint_L" gear="1.0" ctrlrange="0 {MAX_TORQUE_SIM:.5f}">
-  </motor></actuator></p>
-<p>
+&lt;/mujoco&gt;
 """
-</p><div class="highlight"><pre><span></span><code>
-</code></pre></div><p></p>
+</code></pre></div>
 <h1 id="-simulation-code-">---------------- Simulation code ----------------</h1>
 <p>def run_fourleg() -&gt; Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
     model = mujoco.MjModel.from_xml_string(DYN_FOURLEG_XML)
@@ -3068,7 +3076,7 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="laser_cut_standup.jpg" data-desc-position="bottom"><img src="laser_cut_standup.jpg" width="600"></a></p>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_front.jpg" data-desc-position="bottom"><img src="klann_front.jpg" width="600"></a>
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_back.jpg" data-desc-position="bottom"><img src="klann_back.jpg" width="600"></a>
-<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p></mujoco>
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p>
 
 
 
