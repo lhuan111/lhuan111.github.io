@@ -1541,7 +1541,6 @@ Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, 
 4. Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.
 
 Below is the code for the sweep and the results.
-```
 
 ```
 # Add these imports at top if not already present
