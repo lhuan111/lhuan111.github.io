@@ -27,13 +27,11 @@ import matplotlib.animation as animation
 import shutil
 
 import shutil, os # this is to solve the mediapy.show_video failure
-
 ```
 
 The functions of the blocks are described on the first row: 
 
 ```
-
 # ---------------- Global viz params ----------------
 WIDTH, HEIGHT = 1024, 576
 FRAMERATE = 30
@@ -68,6 +66,8 @@ C2_2D = np.array([2.1, 4.053394])
 E2_2D = np.array([2.65, 2.026697])
 F2_2D = np.array([1.55, 2.026697])
 ```
+
+
 ```
 def inch2m_xz(p_inch: np.ndarray) -> np.ndarray:
     """Convert [x,z]_inch in drawing plane -> [x,z]_meter with ground offset."""
@@ -149,7 +149,6 @@ KP_VEL   = 0.7 * (MAX_TORQUE_SIM / OMEGA_DES)
 
 
 ```
-
 # ----------------------------------------------------------------------
 #  Helper: quaternion -> roll, pitch, yaw
 # ----------------------------------------------------------------------
@@ -173,6 +172,7 @@ def quat_to_rpy(q: np.ndarray) -> np.ndarray:
     return np.array([roll, pitch, yaw])
 
 ```
+
 
 ```
 # ======================================================================
@@ -634,11 +634,11 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 </mujoco>
 """
     return xml
-···
+```
 
 
-
-MuJoCo XML: 4 legs, 6 feet, 1 motor
+```
+# MuJoCo XML: 4 legs, 6 feet, 1 motor
 
 DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
@@ -1559,7 +1559,9 @@ import io
 # --------------------------------------------------------------------
 
 #def generate_fourleg_xml(crank_scale: float = 1.0, does the job
+```
 
+```
 # --------------------------------------------------------------------
 # Run one simulation given an XML string, returning metrics and logs.
 # This wraps your existing run_fourleg() but allows passing in
