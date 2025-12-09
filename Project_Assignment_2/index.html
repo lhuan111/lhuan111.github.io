@@ -1529,13 +1529,12 @@ DYN_FOURLEG_XML = f"""
 <h1 id="-simulation-code-">---------------- Simulation code ----------------</h1>
 <p>def run_fourleg() -&gt; Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
     model = mujoco.MjModel.from_xml_string(DYN_FOURLEG_XML)
-    data = mujoco.MjData(model)</p>
-<pre><code># motor joint is joint_L
-jid  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "joint_L")
-qadr = model.jnt_qposadr[jid]
-dadr = model.jnt_dofadr[jid]
-
-# free-base joint (chassis_free: 7 DoF, 7 qpos: x y z qw qx qy qz)
+    data = mujoco.MjData(model)
+    # motor joint is joint_L
+    jid  = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "joint_L")
+    qadr = model.jnt_qposadr[jid]
+    dadr = model.jnt_dofadr[jid]</p>
+<pre><code># free-base joint (chassis_free: 7 DoF, 7 qpos: x y z qw qx qy qz)
 jid_base = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "chassis_free")
 qadr_base = model.jnt_qposadr[jid_base]
 
