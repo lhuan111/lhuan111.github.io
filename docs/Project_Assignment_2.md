@@ -640,7 +640,6 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 
 MuJoCo XML: 4 legs, 6 feet, 1 motor
 
-```
 DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
   <option timestep="0.0002" gravity="0 0 -9.81">
@@ -653,7 +652,7 @@ DYN_FOURLEG_XML = f"""
 
   <worldbody>
 
-    <!-- ground -->
+      <!-- ground -->
     <geom name="floor" type="plane" pos="0 0 0"
           size="2 2 0.02"
           friction="0.5 0.005 0.0005"
@@ -1082,7 +1081,6 @@ DYN_FOURLEG_XML = f"""
 
 </mujoco>
 """
-```
 
 
 ```
