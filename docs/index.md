@@ -1,10 +1,10 @@
 # RAS557 Project Assignment 1 — Klann-style Hexapod
 
-**Instructor: Daniel Aukes**
+###**Team members: Shuai Guo, Lixiao Huang, Yibo Yuan**
 
-### **Team members: Shuai Guo, Lixiao Huang, Yibo Yuan**
+####**Instructor: Daniel Aukes (Fall 2025)**
 
-Contents:
+**Contents**:
 
 - Klann linkage kinematics for a single leg (numeric closed-loop solver)
 - A hexapod arrangement (6 legs) with phase offsets
@@ -12,9 +12,7 @@ Contents:
 - An MJCF generator for MuJoCo (approximate multi-body representation)
 
 
-#**Assignment 1 Initial Submission**
-
-## **1 — Project Goal & Fit**
+## **Part 1 — Project Goal & Fit**
 
 **Team goal:**
 
@@ -44,7 +42,7 @@ Our team brings together complementary skills in mechanical design, kinematics, 
 
 The project directly employs foldable robotics techniques introduced in class, using layered cardboard or plastic sheets with integrated hinge lines to create planar four- and six-bar linkages. The Klann mechanism’s planar structure is ideally suited for this fabrication method, allowing rapid iteration of designs without costly machining. By combining foldable joints with bio-inspired geometry, we can explore how planar foldable mechanisms achieve lifelike motion while remaining lightweight, scalable, and manufacturable using classroom tools.
 
-##**2 — Background Research**
+##**Part 2 — Background Research**
 
 **Search Terms**
 
@@ -155,7 +153,7 @@ This provides an estimate of the **peak vertical ground-reaction force** and the
 
 
 
-##**3 — Specifications Table**
+##**Part 3 — Specifications Table**
 
 The table below lists key physical and kinematic parameters for the **Klann-style six-legged walker**.  
 All quantities are expressed in **SI units**, with values derived from literature on insect locomotion and scaled for the tabletop prototype.
@@ -192,7 +190,7 @@ All quantities are expressed in **SI units**, with values derived from literatur
 - Actual values may vary slightly depending on material density and linkage tolerances.  
 - Use the torque and power values in this table for actuator selection and MuJoCo simulation inputs.
 
-##**4 — Mechanism Design & Kinematic Model**
+##**Part 4 — Mechanism Design & Kinematic Model**
 
 #### Mechanism Description
 The **Klann linkage** is a planar six-bar mechanism designed to transform continuous rotary motion into an approximate leg-like walking trajectory.  
@@ -225,7 +223,7 @@ $l_{10}f$= 1 inch
 <img src="klann_mechanism4.png" width="600">
 
 
-##**5 — Force / Torque / Power Estimation**
+##**Part 5 — Force / Torque / Power Estimation**
 
 Use the Jacobian to map end-effector forces to actuator torques, then compute power = torque * angular velocity.
 Fill in calculated/assumed GRFs and pick key gait states to compute required actuator specs.
@@ -363,7 +361,7 @@ print(f"Crank torque required (Nm) at theta={theta:.3f}: {tau:.4f} N·m")
 print(f"Mechanical power at crank (W) for omega={omega} rad/s: {power:.4f} W")
 ```
 
-##**6 — Plots & Figures**
+##**Part 6 — Plots & Figures**
 
 Use matplotlib to create plots (GRF plots, kinematic traces, energy/power curves).
 
@@ -850,7 +848,7 @@ tau_motor_rated = (0.35 / (10 * 0.7)) * 2 = (0.35 / 7) * 2 = 0.05 * 2 = 0.10 N·
 
 So choose a motor with continuous torque ≥ 0.10 N·m (plus check stall and peak currents). If motor speed needed: if ω_crank = 6 rad/s, ω_motor = 60 rad/s (~572 RPM). Check motor torque-speed curve to ensure it can supply torque at that speed.
 
-##**7. Discussion Points**
+##**Part 7. Discussion Points**
 
 1. Degrees of freedom and number of motors.
 2. How end-effector forces were estimated.
@@ -876,7 +874,7 @@ $$
 The crank angular velocity was chosen as 6 rad/s, corresponding to a walking speed of approximately 0.3 m/s based on the stride length (0.1 m) and step frequency (≈ 3 Hz). This kinematic relationship allows prediction of foot motion through the gait cycle and was verified via the MuJoCo simulation, confirming realistic lift and stance trajectories for the desired gait speed.
 
 
-##**8. Project Files:** 
+##**Part 8. Project Files:** 
 
 - **Option 1: Download the .ipynb file** 
 
