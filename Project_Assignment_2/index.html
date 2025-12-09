@@ -619,7 +619,7 @@ def quat_to_rpy(q: np.ndarray) -&gt; np.ndarray:
     yaw = math.atan2(siny_cosp, cosy_cosp)
     return np.array([roll, pitch, yaw])
 </code></pre></div>
-<div class="highlight"><pre><span></span><code># ======================================================================
+<p></p><div class="highlight"><pre><span></span><code># ======================================================================
 # INSERTED: XML generator for parameter sweeps
 # ======================================================================
 
@@ -1079,15 +1079,18 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 """
     return xml
 ···
+
+
+
+MuJoCo XML: 4 legs, 6 feet, 1 motor
 </code></pre></div>
-<h1 id="mujoco-xml-4-legs-6-feet-1-motor">MuJoCo XML: 4 legs, 6 feet, 1 motor</h1>
-<p>DYN_FOURLEG_XML = f"""
+DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
 <br>
 <option timestep="0.0002" gravity="0 0 -9.81">
     <flag contact="enable">
   </flag></option>
-</mujoco></p>
+<p></p>
 <p><visual>
     <global offwidth="{WIDTH}" offheight="{HEIGHT}">
   </global></visual></p>
@@ -3065,7 +3068,7 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="laser_cut_standup.jpg" data-desc-position="bottom"><img src="laser_cut_standup.jpg" width="600"></a></p>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_front.jpg" data-desc-position="bottom"><img src="klann_front.jpg" width="600"></a>
 <a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_back.jpg" data-desc-position="bottom"><img src="klann_back.jpg" width="600"></a>
-<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p>
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="klann_side.jpg" data-desc-position="bottom"><img src="klann_side.jpg" width="600"></a></p></mujoco>
 
 
 
