@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#demonstrating-robot-kinematics" class="md-skip">
+        <a href="#project-assignment-2-design-build-and-simulate-your-robot" class="md-skip">
           Skip to content
         </a>
       
@@ -312,6 +312,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -340,6 +342,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -348,45 +352,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#demonstrating-robot-kinematics" class="md-nav__link">
+  <a href="#student-shuai-gao-lixiao-huang-yibo-yuan" class="md-nav__link">
     <span class="md-ellipsis">
-      Demonstrating Robot Kinematics:
+      Student: Shuai Gao, Lixiao Huang, Yibo Yuan
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#measuring-friction" class="md-nav__link">
+  <a href="#instructor-daniel-aukes-fall-2025" class="md-nav__link">
     <span class="md-ellipsis">
-      Measuring Friction:
+      Instructor: Daniel Aukes (Fall 2025)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#downloading-the-dxf-file" class="md-nav__link">
+  <a href="#part-1-define-the-system-model" class="md-nav__link">
     <span class="md-ellipsis">
-      Downloading the .dxf file:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#downloading-the-file-making-process-instructions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Downloading the file making process instructions
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#laser-cut-robot-photos" class="md-nav__link">
-    <span class="md-ellipsis">
-      Laser Cut Robot Photos:
+      Part 1: Define the System Model
     </span>
   </a>
   
@@ -417,6 +403,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -425,45 +413,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#demonstrating-robot-kinematics" class="md-nav__link">
+  <a href="#student-shuai-gao-lixiao-huang-yibo-yuan" class="md-nav__link">
     <span class="md-ellipsis">
-      Demonstrating Robot Kinematics:
+      Student: Shuai Gao, Lixiao Huang, Yibo Yuan
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#measuring-friction" class="md-nav__link">
+  <a href="#instructor-daniel-aukes-fall-2025" class="md-nav__link">
     <span class="md-ellipsis">
-      Measuring Friction:
+      Instructor: Daniel Aukes (Fall 2025)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#downloading-the-dxf-file" class="md-nav__link">
+  <a href="#part-1-define-the-system-model" class="md-nav__link">
     <span class="md-ellipsis">
-      Downloading the .dxf file:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#downloading-the-file-making-process-instructions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Downloading the file making process instructions
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#laser-cut-robot-photos" class="md-nav__link">
-    <span class="md-ellipsis">
-      Laser Cut Robot Photos:
+      Part 1: Define the System Model
     </span>
   </a>
   
@@ -492,8 +462,26 @@
   
 
 
-  <h1>Assignment 2</h1>
-
+<h1 id="project-assignment-2-design-build-and-simulate-your-robot">Project Assignment 2: Design, Build and Simulate your Robot</h1>
+<h4 id="student-shuai-gao-lixiao-huang-yibo-yuan">Student: Shuai Gao, Lixiao Huang, Yibo Yuan</h4>
+<h4 id="instructor-daniel-aukes-fall-2025">Instructor: Daniel Aukes (Fall 2025)</h4>
+<p><strong>The purpose of this assignment is to model, optimize, build, and validate your final robot.</strong></p>
+<h2 id="part-1-define-the-system-model">Part 1: Define the System Model</h2>
+<p>Produce a final dynamic model in Mujoco that adapts the ideal kinematics of your initial robot model to your ȴnal geometry, material properties (joint stiffness and beam stiffness), and actuator characteristics. Ensure your model includes some aspect of material compliance / flexibility and motor behavior somewhere in your system, and that you have made it possible to vary at least one design parameter of interest and re-run the simulation in a function, for the purposes of wrapping this function in an optimization process. Plot expected performance of the model over a broad range of possible values, in a way that will be correlated to a real-life experiment.</p>
+<p>The following codes carry out the simulation and plots. </p>
+<p>"""
+from <strong>future</strong> import annotations
+import math
+from typing import List</p>
+<p>import numpy as np
+import mujoco
+import mediapy as media
+import matplotlib.pyplot as plt</p>
+<h1 id="this-package-is-for-animation-of-data">this package is for animation of data</h1>
+<p>import matplotlib.animation as animation</p>
+<p>import shutil</p>
+<p>import shutil, os # this is to solve the mediapy.show_video failure</p>
+<p>"""</p>
 <h2 id="demonstrating-robot-kinematics">Demonstrating Robot Kinematics:</h2>
 <p><iframe width="560" height="315" src="https://www.youtube.com/embed/h-qRB8NbPaI" title="Simulating Robot Kinematics" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
