@@ -1085,7 +1085,6 @@ DYN_FOURLEG_XML = f"""
 
 ```
 # ---------------- Simulation code ----------------
-
 def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
     model = mujoco.MjModel.from_xml_string(DYN_FOURLEG_XML)
     data = mujoco.MjData(model)
@@ -1126,7 +1125,6 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
     tau_log: List[float]      = []
     base_xyz_log: List[np.ndarray] = []
     base_rpy_log: List[np.ndarray] = []
-
 
     # ramp time for motor (seconds)
     ramp_T = 0.45
@@ -1176,7 +1174,6 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
             base_xyz_log.append(base_xyz)
             base_rpy_log.append(base_rpy)
 
-
     #     # -------------- video frame capture ----------------
     #     if k % max(1, int(1.0 / (dt * FRAMERATE))) == 0:
     #         renderer.update_scene(data, camera="cam")
@@ -1190,7 +1187,6 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
     #     except Exception as e:
     #         print("mediapy.show_video failed (ffmpeg/codec issue):", e)
     #         print("Continuing without mediapy preview — animation and saving will still run.")
-
 
             # -------------- video frame capture ----------------
         if k % max(1, int(1.0 / (dt * FRAMERATE))) == 0:
@@ -1213,8 +1209,6 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
             print("mediapy.show_video failed (ffmpeg/codec issue):", e)
             print("Continuing without mediapy preview — animation and saving will still run.")
 
-
-
      # pack logs into dict for plotting
     logs = {
         "t": np.asarray(t_log),
@@ -1229,8 +1223,8 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
     }
 
     return frames, model, data, logs, frame_times
-
 ```
+
 
 ```
 def plot_results(logs):
