@@ -6,6 +6,34 @@
 
 **The purpose of this assignment is to model, optimize, build, and validate your final robot.**
 
+
+<iframe width="560" height="315"
+    src="https://www.youtube.com/embed/21Ap_L2Syjo"
+    title="Simulation"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen>
+</iframe>
+
+<iframe width="560" height="315"
+    src="https://www.youtube.com/embed/k89TbkdRb_I"
+    title="Dynamical Data"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen>
+</iframe>
+
+
+<iframe width="560" height="315"
+    src="https://www.youtube.com/embed/GtDq5xMh6zY"
+    title="Physical Robot"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen>
+</iframe>
+
+
+
 ## Part 1: Define the System Model
 Produce a final dynamic model in Mujoco that adapts the ideal kinematics of your initial robot model to your ȴnal geometry, material properties (joint stiffness and beam stiffness), and actuator characteristics. Ensure your model includes some aspect of material compliance / flexibility and motor behavior somewhere in your system, and that you have made it possible to vary at least one design parameter of interest and re-run the simulation in a function, for the purposes of wrapping this function in an optimization process. Plot expected performance of the model over a broad range of possible values, in a way that will be correlated to a real-life experiment.
 
