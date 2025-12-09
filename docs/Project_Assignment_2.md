@@ -191,14 +191,7 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
     mt = float(MAX_TORQUE_SIM if max_torque is None else max_torque)
     fr = float(FOOT_RADIUS if foot_radius is None else foot_radius)
 
-    # --- Paste the ENTIRE content of your original DYN_FOURLEG_XML here ---
-# ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------
-    
-    # Replace only:
-    #  - the MB_L_bar fromto with {-MB_scaled[0]:.5f} 0 {-MB_scaled[1]:.5f}
-    #  - the MB_R_bar fromto with {MB_scaled[0]:.5f} 0 {MB_scaled[1]:.5f}
-    #  - each foot geom size with {fr:.4f}
-    #  - the actuator ctrlrange upper bound with {mt:.5f}
+# ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ---------------- 
     xml = f"""
 <mujoco model="fourbar_fourlegs">
   <option timestep="0.0002" gravity="0 0 -9.81">
@@ -644,11 +637,9 @@ def generate_fourleg_xml(crank_scale: float = 1.0,
 ···
 
 
-```
-# ---------------- MuJoCo XML: 4 legs, 6 feet, 1 motor ----------------
-```
 
 ```
+#MuJoCo XML: 4 legs, 6 feet, 1 motor
 DYN_FOURLEG_XML = f"""
 <mujoco model="fourbar_fourlegs">
   <option timestep="0.0002" gravity="0 0 -9.81">
