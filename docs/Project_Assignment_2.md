@@ -1227,6 +1227,7 @@ def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict
 
 
 ```
+```
 def plot_results(logs):
     t        = logs["t"]
     q        = logs["q"]
