@@ -1538,6 +1538,7 @@ Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, 
 4. Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.
 
 Below is the code for the sweep and the results.
+```
 
 ```
 # Add these imports at top if not already present
@@ -1819,6 +1820,7 @@ Plotting distance and energy versus MAX_TORQUE_SIM will show these trends.
 6. Vary the same value in your prototype. How does performance change in your in real-life?
 
 I am implementing 5 and 6 together in the following code by providing the function first and then provide different torque_values = np.linspace(0.02, 0.10, 5). For question 6, our prototype in life is still in progress. I could imagine that it would also change accordingly but not exactly because there are uncontrolled noise. 
+
 
 ```
 # tell animator which joint(s) correspond to q/dq ordering used in logs
