@@ -1295,8 +1295,6 @@ def plot_results(logs):
 
 
 ```
-
-
 ```
 def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
     t        = logs["t"]
@@ -1515,7 +1513,6 @@ if __name__ == "__main__":
     #     animate_results(frames, logs, frame_times, out_filename="Hexapod_animation_initial")
     # else:
     #     plot_results(logs)
-
 ```
 
 
@@ -2082,7 +2079,7 @@ process as in chapter 52 of the book. Save the cut files
 
 3. Laser cut the geometry on each layer.
 
-** Laser cutting instructions (markdown)**
+**Laser cutting instructions (markdown)**
 
 **Before cutting:**
 - Confirm material thickness and kerf (our script uses `kerf=0.05` — adjust to actual laser kerf, e.g., 0.2 mm).
