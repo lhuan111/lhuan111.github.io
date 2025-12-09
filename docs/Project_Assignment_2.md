@@ -1294,6 +1294,9 @@ def plot_results(logs):
 
 
 ```
+
+
+```
 def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
     t        = logs["t"]
     q        = logs["q"]
