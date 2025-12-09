@@ -1,6 +1,6 @@
 # Project Assignment 2: Design, Build and Simulate your Robot
 
-#### Student: Shuai Gao, Lixiao Huang, Yibo Yuan
+#### Students: Shuai Gao, Lixiao Huang, Yibo Yuan
 
 #### Instructor: Daniel Aukes (Fall 2025)
 
