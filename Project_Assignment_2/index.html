@@ -469,12 +469,15 @@
 <iframe width="560" height="315" src="https://www.youtube.com/embed/21Ap_L2Syjo" title="Simulation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
 </iframe>
 
+<p>The first video is our Mujoco simulation. </p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/k89TbkdRb_I" title="Dynamical Data" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
 </iframe>
 
+<p>The second video is our Mujoco-generated real-time data while the robot walks. </p>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/GtDq5xMh6zY" title="Physical Robot" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
 </iframe>
 
+<p>The third video is our physical robot. </p>
 <h2 id="part-1-define-the-system-model">Part 1: Define the System Model</h2>
 <p>Produce a final dynamic model in Mujoco that adapts the ideal kinematics of your initial robot model to your ȴnal geometry, material properties (joint stiffness and beam stiffness), and actuator characteristics. Ensure your model includes some aspect of material compliance / flexibility and motor behavior somewhere in your system, and that you have made it possible to vary at least one design parameter of interest and re-run the simulation in a function, for the purposes of wrapping this function in an optimization process. Plot expected performance of the model over a broad range of possible values, in a way that will be correlated to a real-life experiment.</p>
 <p>The following codes carry out the simulation and plots. </p>
@@ -1728,9 +1731,7 @@ return frames, model, data, logs, frame_times
 
     fig.tight_layout()
     plt.show()</code></p>
-<p></p><div class="highlight"><pre><span></span><code>
-</code></pre></div>
-def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
+<div class="highlight"><pre><span></span><code>def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[float], out_filename=None):
     t        = logs["t"]
     q        = logs["q"]
     dq       = logs["dq"]
@@ -1738,222 +1739,222 @@ def animate_results(frames: List[np.ndarray], logs: dict, frame_times: List[floa
     tau      = logs["tau"]
     base_xyz = logs["base_xyz"]
     base_rpy = logs["base_rpy"]
-    joint_names = logs["joint_names"]<p></p>
-<pre><code>if t.size == 0:
-    print("No logged data to animate.")
-    return
+    joint_names = logs["joint_names"]
 
-# If frame_times is empty but frames exist, reconstruct approximate times
-if (len(frame_times) == 0) and frames:
-    # uniformly space the frame times across the logged time interval
-    frame_times = np.linspace(float(t[0]), float(t[-1]), len(frames))
-    print("Reconstructed frame_times from logs: using", len(frame_times), "frames")
+    if t.size == 0:
+        print("No logged data to animate.")
+        return
 
-# Map each captured frame time -&gt; nearest logged sample index
-frame_times = np.asarray(frame_times)
-sample_indices = np.searchsorted(t, frame_times, side="right") - 1
-sample_indices = np.clip(sample_indices, 0, t.size - 1)
+    # If frame_times is empty but frames exist, reconstruct approximate times
+    if (len(frame_times) == 0) and frames:
+        # uniformly space the frame times across the logged time interval
+        frame_times = np.linspace(float(t[0]), float(t[-1]), len(frames))
+        print("Reconstructed frame_times from logs: using", len(frame_times), "frames")
 
-# Prepare figure with 3x2 axes plus an inset for the rendering image
-fig, axs = plt.subplots(3, 2, figsize=(12, 9))
-ax_pos, ax_vel, ax_ctrl, ax_tau, ax_base, ax_rpy = \
-    axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1], axs[2, 0], axs[2, 1]
+    # Map each captured frame time -&gt; nearest logged sample index
+    frame_times = np.asarray(frame_times)
+    sample_indices = np.searchsorted(t, frame_times, side="right") - 1
+    sample_indices = np.clip(sample_indices, 0, t.size - 1)
 
-# Set up lines (initially empty)
-pos_lines = []
-for j, name in enumerate(joint_names):
-    (ln,) = ax_pos.plot([], [], label=name)
-    pos_lines.append(ln)
-ax_pos.set_title("Joint Positions")
-ax_pos.set_ylabel("q [rad]")
-ax_pos.legend(fontsize=8, loc="upper left")
+    # Prepare figure with 3x2 axes plus an inset for the rendering image
+    fig, axs = plt.subplots(3, 2, figsize=(12, 9))
+    ax_pos, ax_vel, ax_ctrl, ax_tau, ax_base, ax_rpy = \
+        axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1], axs[2, 0], axs[2, 1]
 
-vel_lines = []
-for j, name in enumerate(joint_names):
-    (ln,) = ax_vel.plot([], [], label=name)
-    vel_lines.append(ln)
-ax_vel.set_title("Joint Velocities")
-ax_vel.set_ylabel("dq [rad/s]")
-ax_vel.legend(fontsize=8, loc="upper left")
+    # Set up lines (initially empty)
+    pos_lines = []
+    for j, name in enumerate(joint_names):
+        (ln,) = ax_pos.plot([], [], label=name)
+        pos_lines.append(ln)
+    ax_pos.set_title("Joint Positions")
+    ax_pos.set_ylabel("q [rad]")
+    ax_pos.legend(fontsize=8, loc="upper left")
 
-ctrl_line, = ax_ctrl.plot([], [], label="u")
-ax_ctrl.set_title("Motor Control (ctrl)")
-ax_ctrl.set_ylabel("Signal")
-ax_ctrl.legend(fontsize=8, loc="upper left")
+    vel_lines = []
+    for j, name in enumerate(joint_names):
+        (ln,) = ax_vel.plot([], [], label=name)
+        vel_lines.append(ln)
+    ax_vel.set_title("Joint Velocities")
+    ax_vel.set_ylabel("dq [rad/s]")
+    ax_vel.legend(fontsize=8, loc="upper left")
 
-tau_line, = ax_tau.plot([], [], label="tau")
-ax_tau.set_title("Motor Torque (qfrc_actuator)")
-ax_tau.set_ylabel("Torque [N·m]")
-ax_tau.legend(fontsize=8, loc="upper left")
+    ctrl_line, = ax_ctrl.plot([], [], label="u")
+    ax_ctrl.set_title("Motor Control (ctrl)")
+    ax_ctrl.set_ylabel("Signal")
+    ax_ctrl.legend(fontsize=8, loc="upper left")
 
-base_x_line, = ax_base.plot([], [], label="x (cm-corr)")
-base_y_line, = ax_base.plot([], [], label="y (cm-corr)")
-base_z_line, = ax_base.plot([], [], label="z (cm-corr)")
-ax_base.set_title("Base Position (corrected)")
-ax_base.set_ylabel("Meters (cm-corrected)")
-ax_base.set_xlabel("Time [s]")
-ax_base.legend(fontsize=8, loc="upper left")
+    tau_line, = ax_tau.plot([], [], label="tau")
+    ax_tau.set_title("Motor Torque (qfrc_actuator)")
+    ax_tau.set_ylabel("Torque [N·m]")
+    ax_tau.legend(fontsize=8, loc="upper left")
 
-rln, = ax_rpy.plot([], [], label="roll")
-pln, = ax_rpy.plot([], [], label="pitch")
-yln, = ax_rpy.plot([], [], label="yaw")
-rpy_lines = [rln, pln, yln]
-ax_rpy.set_title("Base Orientation")
-ax_rpy.set_ylabel("Rad")
-ax_rpy.set_xlabel("Time [s]")
-ax_rpy.legend(fontsize=8, loc="upper left")
+    base_x_line, = ax_base.plot([], [], label="x (cm-corr)")
+    base_y_line, = ax_base.plot([], [], label="y (cm-corr)")
+    base_z_line, = ax_base.plot([], [], label="z (cm-corr)")
+    ax_base.set_title("Base Position (corrected)")
+    ax_base.set_ylabel("Meters (cm-corrected)")
+    ax_base.set_xlabel("Time [s]")
+    ax_base.legend(fontsize=8, loc="upper left")
 
-# Precompute plotting limits from logged data (with small margins)
-ax_pos.set_xlim(float(t[0]), float(t[-1]))
-qmin, qmax = np.min(q), np.max(q)
-margin = max(1e-6, 0.1 * max(abs(qmin), abs(qmax)))
-ax_pos.set_ylim(qmin - margin, qmax + margin)
+    rln, = ax_rpy.plot([], [], label="roll")
+    pln, = ax_rpy.plot([], [], label="pitch")
+    yln, = ax_rpy.plot([], [], label="yaw")
+    rpy_lines = [rln, pln, yln]
+    ax_rpy.set_title("Base Orientation")
+    ax_rpy.set_ylabel("Rad")
+    ax_rpy.set_xlabel("Time [s]")
+    ax_rpy.legend(fontsize=8, loc="upper left")
 
-ax_vel.set_xlim(float(t[0]), float(t[-1]))
-if dq.size:
-    dmin, dmax = np.min(dq), np.max(dq)
-    md = max(1e-6, 0.1 * max(abs(dmin), abs(dmax)))
-    ax_vel.set_ylim(dmin - md, dmax + md)
+    # Precompute plotting limits from logged data (with small margins)
+    ax_pos.set_xlim(float(t[0]), float(t[-1]))
+    qmin, qmax = np.min(q), np.max(q)
+    margin = max(1e-6, 0.1 * max(abs(qmin), abs(qmax)))
+    ax_pos.set_ylim(qmin - margin, qmax + margin)
 
-ax_ctrl.set_xlim(float(t[0]), float(t[-1]))
-ax_ctrl.set_ylim(np.min(u) - 1e-6, np.max(u) + 1e-6)
+    ax_vel.set_xlim(float(t[0]), float(t[-1]))
+    if dq.size:
+        dmin, dmax = np.min(dq), np.max(dq)
+        md = max(1e-6, 0.1 * max(abs(dmin), abs(dmax)))
+        ax_vel.set_ylim(dmin - md, dmax + md)
 
-ax_tau.set_xlim(float(t[0]), float(t[-1]))
-ax_tau.set_ylim(np.min(tau) - 1e-6, np.max(tau) + 1e-6)
+    ax_ctrl.set_xlim(float(t[0]), float(t[-1]))
+    ax_ctrl.set_ylim(np.min(u) - 1e-6, np.max(u) + 1e-6)
 
-ax_base.set_xlim(float(t[0]), float(t[-1]))
-if base_xyz.size:
-    xyz_corr = base_xyz * LENGTH_CORR
-    bxmin, bxmax = np.min(xyz_corr), np.max(xyz_corr)
-    bmargin = max(1e-6, 0.1 * max(abs(bxmin), abs(bxmax)))
-    ax_base.set_ylim(bxmin - bmargin, bxmax + bmargin)
-else:
-    xyz_corr = np.zeros_like(base_xyz)
+    ax_tau.set_xlim(float(t[0]), float(t[-1]))
+    ax_tau.set_ylim(np.min(tau) - 1e-6, np.max(tau) + 1e-6)
 
-ax_rpy.set_xlim(float(t[0]), float(t[-1]))
-if base_rpy.size:
-    rmin, rmax = np.min(base_rpy), np.max(base_rpy)
-    ax_rpy.set_ylim(rmin - 0.1, rmax + 0.1)
-
-# Add an axes for the renderer frames and display the first frame.
-# Put it in lower-right so it doesn't occlude main plots.
-img_ax = fig.add_axes([0.75, 0.78, 0.20, 0.20])  # x, y, w, h
-# img_ax = fig.add_axes([0.35, 0.88, 0.30, 0.20])  # above everything
-img_ax.axis('off')
-
-if frames:
-    im = img_ax.imshow(frames[0])
-else:
-    blank = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
-    im = img_ax.imshow(blank)
-
-# Animation will have one step per renderer frame
-n_steps = len(frame_times)
-if n_steps &lt;= 0:
-    print("No frames to animate.")
-    return
-
-# compute interval from adjacent frame times (ms)
-if n_steps &gt; 1:
-    interval_ms = 1000.0 * float(frame_times[1] - frame_times[0])
-else:
-    interval_ms = 1000.0 / FRAMERATE
-
-# Update function: i indexes frames (0..n_steps-1)
-def update(i):
-    # find the largest logged-sample index corresponding to this frame
-    max_idx = int(sample_indices[i])
-
-    ti = t[: max_idx + 1]
-
-    # update joint pos/vel lines
-    for j, ln in enumerate(pos_lines):
-        ln.set_data(ti, q[: max_idx + 1, j])
-    for j, ln in enumerate(vel_lines):
-        if dq.size:
-            ln.set_data(ti, dq[: max_idx + 1, j])
-
-    # update ctrl &amp; torque
-    ctrl_line.set_data(ti, u[: max_idx + 1])
-    tau_line.set_data(ti, tau[: max_idx + 1])
-
-    # update base pos
+    ax_base.set_xlim(float(t[0]), float(t[-1]))
     if base_xyz.size:
-        base_x_line.set_data(ti, xyz_corr[: max_idx + 1, 0])
-        base_y_line.set_data(ti, xyz_corr[: max_idx + 1, 1])
-        base_z_line.set_data(ti, xyz_corr[: max_idx + 1, 2])
+        xyz_corr = base_xyz * LENGTH_CORR
+        bxmin, bxmax = np.min(xyz_corr), np.max(xyz_corr)
+        bmargin = max(1e-6, 0.1 * max(abs(bxmin), abs(bxmax)))
+        ax_base.set_ylim(bxmin - bmargin, bxmax + bmargin)
+    else:
+        xyz_corr = np.zeros_like(base_xyz)
 
-    # update rpy
+    ax_rpy.set_xlim(float(t[0]), float(t[-1]))
     if base_rpy.size:
-        rpy_lines[0].set_data(ti, base_rpy[: max_idx + 1, 0])
-        rpy_lines[1].set_data(ti, base_rpy[: max_idx + 1, 1])
-        rpy_lines[2].set_data(ti, base_rpy[: max_idx + 1, 2])
+        rmin, rmax = np.min(base_rpy), np.max(base_rpy)
+        ax_rpy.set_ylim(rmin - 0.1, rmax + 0.1)
 
-    # update image frame
+    # Add an axes for the renderer frames and display the first frame.
+    # Put it in lower-right so it doesn't occlude main plots.
+    img_ax = fig.add_axes([0.75, 0.78, 0.20, 0.20])  # x, y, w, h
+    # img_ax = fig.add_axes([0.35, 0.88, 0.30, 0.20])  # above everything
+    img_ax.axis('off')
+
     if frames:
-        im.set_data(frames[i])
-
-    return pos_lines + vel_lines + [ctrl_line, tau_line, base_x_line, base_y_line, base_z_line] + rpy_lines + [im]
-
-ani = animation.FuncAnimation(fig, update, frames=n_steps, interval=interval_ms, blit=False, repeat=False)
-
-# tidy layout and show
-plt.subplots_adjust(left=0.06, right=0.95, top=0.96, bottom=0.06, hspace=0.35, wspace=0.28)
-plt.show()
-
-
-if SAVE_ANIMATION:
-    # normalize filename: default to mp4 if not specified
-    if out_filename is None:
-        out_filename = "fourleg_animation.mp4"
+        im = img_ax.imshow(frames[0])
     else:
-        # add .mp4 if user omitted a known extension
-        if not out_filename.lower().endswith((".mp4", ".gif")):
-            out_filename = out_filename + ".mp4"
+        blank = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
+        im = img_ax.imshow(blank)
 
-    # prefer mp4 via ffmpeg if available
-    if out_filename.lower().endswith(".mp4") and shutil.which("ffmpeg") is not None:
-        try:
-            writer = animation.FFMpegWriter(fps=FRAMERATE)
-            ani.save(out_filename, writer=writer)
-            print(f"Saved animation to {out_filename}")
-        except Exception as e:
-            print("FFMpegWriter save failed:", e)
+    # Animation will have one step per renderer frame
+    n_steps = len(frame_times)
+    if n_steps &lt;= 0:
+        print("No frames to animate.")
+        return
+
+    # compute interval from adjacent frame times (ms)
+    if n_steps &gt; 1:
+        interval_ms = 1000.0 * float(frame_times[1] - frame_times[0])
     else:
-        # fallback to GIF using PillowWriter (no ffmpeg required)
-        try:
-            gif_out = out_filename.rsplit(".", 1)[0] + ".gif"
-            from matplotlib.animation import PillowWriter
-            pwriter = PillowWriter(fps=FRAMERATE)
-            ani.save(gif_out, writer=pwriter)
-            print(f"Saved animation to {gif_out}")
-            print("See the produced video")
-        except Exception as e:
-            print("Could not save animation (FFMpeg missing or save failed):", e)
-</code></pre>
-<p>if <strong>name</strong> == "<strong>main</strong>":
+        interval_ms = 1000.0 / FRAMERATE
+
+    # Update function: i indexes frames (0..n_steps-1)
+    def update(i):
+        # find the largest logged-sample index corresponding to this frame
+        max_idx = int(sample_indices[i])
+
+        ti = t[: max_idx + 1]
+
+        # update joint pos/vel lines
+        for j, ln in enumerate(pos_lines):
+            ln.set_data(ti, q[: max_idx + 1, j])
+        for j, ln in enumerate(vel_lines):
+            if dq.size:
+                ln.set_data(ti, dq[: max_idx + 1, j])
+
+        # update ctrl &amp; torque
+        ctrl_line.set_data(ti, u[: max_idx + 1])
+        tau_line.set_data(ti, tau[: max_idx + 1])
+
+        # update base pos
+        if base_xyz.size:
+            base_x_line.set_data(ti, xyz_corr[: max_idx + 1, 0])
+            base_y_line.set_data(ti, xyz_corr[: max_idx + 1, 1])
+            base_z_line.set_data(ti, xyz_corr[: max_idx + 1, 2])
+
+        # update rpy
+        if base_rpy.size:
+            rpy_lines[0].set_data(ti, base_rpy[: max_idx + 1, 0])
+            rpy_lines[1].set_data(ti, base_rpy[: max_idx + 1, 1])
+            rpy_lines[2].set_data(ti, base_rpy[: max_idx + 1, 2])
+
+        # update image frame
+        if frames:
+            im.set_data(frames[i])
+
+        return pos_lines + vel_lines + [ctrl_line, tau_line, base_x_line, base_y_line, base_z_line] + rpy_lines + [im]
+
+    ani = animation.FuncAnimation(fig, update, frames=n_steps, interval=interval_ms, blit=False, repeat=False)
+
+    # tidy layout and show
+    plt.subplots_adjust(left=0.06, right=0.95, top=0.96, bottom=0.06, hspace=0.35, wspace=0.28)
+    plt.show()
+
+
+    if SAVE_ANIMATION:
+        # normalize filename: default to mp4 if not specified
+        if out_filename is None:
+            out_filename = "fourleg_animation.mp4"
+        else:
+            # add .mp4 if user omitted a known extension
+            if not out_filename.lower().endswith((".mp4", ".gif")):
+                out_filename = out_filename + ".mp4"
+
+        # prefer mp4 via ffmpeg if available
+        if out_filename.lower().endswith(".mp4") and shutil.which("ffmpeg") is not None:
+            try:
+                writer = animation.FFMpegWriter(fps=FRAMERATE)
+                ani.save(out_filename, writer=writer)
+                print(f"Saved animation to {out_filename}")
+            except Exception as e:
+                print("FFMpegWriter save failed:", e)
+        else:
+            # fallback to GIF using PillowWriter (no ffmpeg required)
+            try:
+                gif_out = out_filename.rsplit(".", 1)[0] + ".gif"
+                from matplotlib.animation import PillowWriter
+                pwriter = PillowWriter(fps=FRAMERATE)
+                ani.save(gif_out, writer=pwriter)
+                print(f"Saved animation to {gif_out}")
+                print("See the produced video")
+            except Exception as e:
+                print("Could not save animation (FFMpeg missing or save failed):", e)
+
+
+if __name__ == "__main__":
     frames, model, data, logs, frame_times = run_fourleg()
     # animate_results(frames, logs, frame_times, out_filename="Hexapod_animation_initial")
     animate_results(frames, logs, frame_times, out_filename="Hexapod_animation_optimized")
-    plot_results(logs)</p>
-<pre><code># # choose mode
-# USE_DYNAMIC = True
+    plot_results(logs)
 
-# # The following prints the dynamic results
-# if USE_DYNAMIC:
-#     animate_results(frames, logs, frame_times, out_filename="Hexapod_animation_initial")
-# else:
-#     plot_results(logs)
-</code></pre>
-<p><code>&lt;img src="Data_output.jpg" alt="Data Output" width="600"&gt;
+    # # choose mode
+    # USE_DYNAMIC = True
 
-&lt;iframe width="560" height="315"
-    src="https://www.youtube.com/embed/k89TbkdRb_I"
-    title="Dynamical Data"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    allowfullscreen&gt;
-&lt;/iframe&gt;</code></p>
+    # # The following prints the dynamic results
+    # if USE_DYNAMIC:
+    #     animate_results(frames, logs, frame_times, out_filename="Hexapod_animation_initial")
+    # else:
+    #     plot_results(logs)
+</code></pre></div>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="Data_output.jpg" data-desc-position="bottom"><img src="Data_output.jpg" alt="Data Output" width="600"></a>
+Figure 1. Data output shows the static version of sweep results</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/k89TbkdRb_I" title="Dynamical Data" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+</iframe>
+
+<p>This video shows the real-time dynamical data collection in Mujoco. </p>
 <h2 id="part-2-optimize-your-design">Part 2: Optimize your design</h2>
 <p>Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?</p>
 <ol>
@@ -1966,15 +1967,19 @@ if SAVE_ANIMATION:
 <p><strong>Metric definitions</strong></p>
 <p>We compute two metrics per simulation run:</p>
 <ul>
-<li>Forward Distance (m) — base_x_final - base_x_initial (use base world x position from data.qpos or data.site_xpos if you prefer a specific site).</li>
-<li>Energy used (J) — numerical integral over simulation of actuator power: sum(|tau * joint_vel| * dt) where tau is data.qfrc_actuator for the motor and joint_vel is the motor joint velocity. We use absolute work approximated by |torque * angular_velocity| * dt. Optionally divide distance by energy for efficiency (m/J).</li>
+<li>
+<p>Forward Distance (m) — base_x_final - base_x_initial (use base world x position from data.qpos or data.site_xpos if you prefer a specific site).</p>
+</li>
+<li>
+<p>Energy used (J) — numerical integral over simulation of actuator power: sum(|tau * joint_vel| * dt) where tau is data.qfrc_actuator for the motor and joint_vel is the motor joint velocity. We use absolute work approximated by |torque * angular_velocity| * dt. Optionally divide distance by energy for efficiency (m/J).</p>
+</li>
 </ul>
 <p>Our XML already contains many <site> elements (e.g., DE1_L_end_site, E1_L_site, F1_L_site, D1_L_site, and possibly the chassis motor_block geom). To measure chassis base world position, we'll use the free body joint chassis_free qpos (first three elements of data.qpos at the base qpos address), which you already logged in base_xyz_log. That avoids any extra <sensor> syntax and is reliable.</sensor></site></p>
 <ol>
 <li>Create a relatively granular sweep of your performance metric over the range of design variable(s) and plot your results.</li>
 </ol>
 <p>Below is the code for the sweep and the results.</p>
-<div class="highlight"><pre><span></span><code># Add these imports at top if not already present
+<div class="highlight"><pre><span></span><code>#Add these imports at top if not already present
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -2143,6 +2148,7 @@ def compute_metrics_from_logs(logs: dict, dt_est: float) -&gt; dict:
     efficiency = distance / energy if energy &gt; 1e-12 else 0.0
 
     return {"distance": distance, "energy": energy, "efficiency": efficiency, "dt": dt}
+
 
 # --------------------------------------------------------------------
 # Sweep a parameter (e.g. MAX_TORQUE_SIM) across values and collect metrics
