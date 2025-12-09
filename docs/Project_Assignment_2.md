@@ -2582,22 +2582,26 @@ We do not know how to do Part 4 Experimental Validation and Analysis. The follow
 
 The greatest challenge is to make the linkage robot flat. We tried many versions of prototypes. 
 
-<img src="prototype1.jpg" alt="Prototype 1" width="400">
+<img src="prototype1.jpg" alt="Prototype 1" width="500">
 
-<img src="prototype2.jpg" alt="Prototype 2" width="400">
+<img src="prototype2.jpg" alt="Prototype 2" width="500">
 
-<video width="400" controls>
+<img src="laser_cut_flat.jpg" alt="Laser Cut" width="500">
+
+<img src="laser_cut_standup.jpg" alt="Laser Cut" width="500">
+
+<video width="500" controls>
   <source src="prototype3.mp4" type="video/mp4">
 </video>
 
 
 Finally, the robot is walking, we used one AAA battery at first and then it was not enough to move the robot, then we used 3 AAA batteries and it moved. When we put all three AAA batteries directly on the robot, the robot cannot carry the heavy weight to move. Maybe we need stiffer materials to carry a heavy payload. 
 
-<img src="prototype5.png" alt="Prototype 5" width="400">
+<img src="prototype5.png" alt="Prototype 5" width="500">
 
-<img src="prototype5b.png" alt="Prototype 5b" width="400">
+<img src="prototype5b.png" alt="Prototype 5b" width="500">
 
-<video width="400" controls>
+<video width="500" controls>
   <source src="prototype5b.mp4" type="video/mp4">
 </video>
 
@@ -2612,10 +2616,9 @@ Finally, the robot is walking, we used one AAA battery at first and then it was 
 </iframe>
 
 
+#### We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degress, so we decided to continue using the motor. 
 
-We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degress, so we decided to continue using the motor. 
-
-<video width="400" controls>
+<video width="500" controls>
   <source src="servo.mp4" type="video/mp4">
 </video>
 
@@ -2659,6 +2662,19 @@ Contents:
 - temperature_C: optional motor temperature
 - sim_results — dict with arrays from your simulation sweep (param, distance, energy, efficiency) — e.g., the results you computed earlier.
 - Real experiment CSVs organized in data_dir with filenames following the schema above.
+
+## Measuring Friction:
+
+<iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/GbdgqD_z7yU"
+    title="Measuring Friction"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+</iframe>
+
 
 Below is the expected code to run on the real robot: 
 
@@ -2787,20 +2803,6 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 ```
 
 
-## Measuring Friction:
-
-<iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/GbdgqD_z7yU"
-    title="Measuring Friction"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-</iframe>
-
-
-
 
 
 
@@ -2813,13 +2815,5 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 
 [Download the file making instructions](Project%20Laser%20Cut.pdf)
 
-## Laser Cut Robot Photos: 
-
-<img src="laser_cut_flat.jpg" width="600">
-<img src="laser_cut_standup.jpg" width="600">
-
-<img src="klann_front.jpg" width="600">
-<img src="klann_back.jpg" width="600">
-<img src="klann_side.jpg" width="600">
 
 
