@@ -43,17 +43,11 @@ The following codes carry out the simulation and plots.
 from __future__ import annotations
 import math
 from typing import List
-
 import numpy as np
 import mujoco
 import mediapy as media
-import matplotlib.pyplot as plt
-
-#this package is for animation of data
+import matplotlib.pyplot as plt #this package is for animation of data
 import matplotlib.animation as animation
-
-import shutil
-
 import shutil, os # this is to solve the mediapy.show_video failure
 ```
 
@@ -2557,7 +2551,7 @@ Below is a Python cell that programmatically:
 **WARNING**: Running many MuJoCo simulations can be slow. Run a small sweep first.
 
 ```
-# Parameter sweep wrapper
+#Parameter sweep wrapper
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -2653,7 +2647,7 @@ Finally, the robot is walking, we used one AAA battery at first and then it was 
 </iframe>
 
 
-#### We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degress, so we decided to continue using the motor. 
+#### We tried to use the servo, but the servo goes back and forth, not continouly rolling 360 degrees, so we decided to continue using the motor. 
 
 <video width="500" controls>
   <source src="servo.mp4" type="video/mp4">
@@ -2764,7 +2758,7 @@ def compute_metrics_from_run(df: pd.DataFrame, Kt: float, dt_override=None):
 ```
 
 ```
-# ------------------ Aggregate experimental results ------------------
+#Aggregate experimental results ------------------
 def aggregate_experiment(data_dir: str, torque_values: List[float], Kt: float):
     agg = {'param': [], 'distance_mean': [], 'distance_std': [],
            'mech_energy_mean': [], 'mech_energy_std': [],
@@ -2838,9 +2832,6 @@ def plot_sim_vs_exp(sim_results: dict, exp_agg: dict):
 # plot_sim_vs_exp(sim_results, exp_agg)
 
 ```
-
-
-
 
 
 
