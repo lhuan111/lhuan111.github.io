@@ -1112,7 +1112,7 @@ DYN_FOURLEG_XML = f"""
 
 
 ```
-# Simulation code
+#Simulation code
 def run_fourleg() -> Tuple[List[np.ndarray], mujoco.MjModel, mujoco.MjData, dict, List[float]]:
     model = mujoco.MjModel.from_xml_string(DYN_FOURLEG_XML)
     data = mujoco.MjData(model)
@@ -1543,9 +1543,19 @@ if __name__ == "__main__":
     #     plot_results(logs)
 ```
 
+<img src="Data_output.jpg" alt="Data Output" width="600">
+
+<iframe width="560" height="315"
+    src="https://www.youtube.com/embed/k89TbkdRb_I"
+    title="Dynamical Data"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen>
+</iframe>
+
+
 ```
 ## Part 2: Optimize your design
-## Part 1: Define the System Model
 
 Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
 
