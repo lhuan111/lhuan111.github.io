@@ -1515,7 +1515,7 @@ if __name__ == "__main__":
     #     plot_results(logs)
 ```
 
-
+```
 ## Part 2: Optimize your design
 
 Using your Mujoco Model along with your prototype, select one or more design parameter(s) for additional study. How does varying this design variable impact your robot’s performance?
@@ -2066,7 +2066,7 @@ for torque in torque_values:
 run_analysis_pipeline("exp/")
 ```
 
-# Part 3: Plan and Execute the Manufacturing
+## Part 3: Plan and Execute the Manufacturing
 
 1. Define the mechanism that will be fabricated using the examples from the book. This may be done with a tool like LibreCAD or similar, and the results should be a .dxf file, with colors indicating hinges, cuts and any other important geometry as color coded lines on different dxf layers.
 
@@ -2564,7 +2564,7 @@ def sweep_hinge_gap(hinge_values_mm, xml_template_str, output_dir="sweep_outputs
 
 
 
-# Part 4. Experimental Validation and Analysis 
+## Part 4. Experimental Validation and Analysis 
 
 1. Vary the design parameter you selected for study earlier in your optimization. This is your experimental variable. Keep all other variables constant.
 2. Run the robot, and collect data. You may use any sensor at your disposal
