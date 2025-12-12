@@ -896,6 +896,8 @@ The crank angular velocity was chosen as 6 rad/s, corresponding to a walking spe
 
 [Download Assignment 1 Notebook (.ipynb)](RAS557%20Project%20Assignment%201%20%E2%80%94%20Klann-style%20Hexapod_Oct%2015_v2.ipynb)
 
+[Download Assignnemnt 1 Notebook improved version][RAS557%20Project%20Assignment%201%20%E2%80%94%20Klann-style%20Hexapod_Dec8_v3.ipynb]
+
 
 - **Option 2: Download the .pdf file**
 
